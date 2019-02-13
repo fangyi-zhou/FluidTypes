@@ -1,18 +1,28 @@
 ﻿open Microsoft.FSharp.Compiler.SourceCodeServices
+open Microsoft.FSharp.Core
 open System.IO
+
+let rec checkExpr (e: FSharpExpr) =
+    let () =
+        match e with
+        | BasicPatterns.Const (o, ty) ->
+            match ty with
+            | int -> printf "%d\n" (o :?> int)
+            | _ -> ()
+        | _ -> ()
+    in
+    List.iter checkExpr e.ImmediateSubExpressions
 
 let countDecl (fileContents : FSharpImplementationFileContents) =
     let decl = fileContents.Declarations in
     let rec checkDecl (decl : FSharpImplementationFileDeclaration) : int =
         match decl with
         | FSharpImplementationFileDeclaration.Entity (_entity, decls) ->
-            printf "Entity\n";
             List.sumBy checkDecl decls
-        | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue _ ->
-            printf "MemberOrFunctionOrValue";
+        | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue (_, _, e) ->
+            checkExpr e;
             1
         | FSharpImplementationFileDeclaration.InitAction _ ->
-            printf "InitAction";
             1
     in
     let declCounts = List.map checkDecl decl in
