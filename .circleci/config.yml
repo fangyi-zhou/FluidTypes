@@ -7,10 +7,20 @@ jobs:
     steps:
       - checkout
 
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "Fluid/packages.config" }}
+            - deps-
+
       - run:
           name: Restore dependencies
           command: nuget restore
 
       - run:
           name: Build
-          command: xbuild
+          command: msbuild
+
+      - save_cache:
+          key: deps-{{ checksum "Fluid/packages.config" }}
+          paths:
+            - packages
