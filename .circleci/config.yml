@@ -1,0 +1,16 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: fsharp
+
+    steps:
+      - checkout
+
+      - run:
+          name: Restore dependencies
+          command: nuget restore
+
+      - run:
+          name: Build
+          command: xbuild
