@@ -20,6 +20,14 @@ jobs:
           name: Build
           command: msbuild
 
+      - run:
+          name: Test
+          command: mono packages/NUnit.ConsoleRunner.3.9.0/tools/nunit3-console.exe FluidTest/FluidTest.fsproj --result=junit
+
+      - store_test_results:
+          path: junit
+
+
       - save_cache:
           key: deps-{{ checksum "Fluid/packages.config" }}
           paths:
