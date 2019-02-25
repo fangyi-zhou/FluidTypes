@@ -20,8 +20,24 @@ module Definitions =
     and Constant = 
     | IntLiteral of int
     | BoolLiteral of bool
-    | Arithmetic of (int -> int -> int)
-    | Relational of (BaseTy -> BaseTy -> BaseTy)
+    | Binop of Binop
+    | Unop of Unop
+    and Binop =
+    | Plus
+    | Minus
+    | And
+    | Or
+    | EqualInt
+    | NotEqualInt
+    | EqualBool
+    | NotEqualBool
+    | Greater
+    | GreaterEqual
+    | Less
+    | LessEqual
+    and Unop =
+    | Not
+    | Negate
 
     type TyCtx = {
         varCtx: Map<string, Ty>;
