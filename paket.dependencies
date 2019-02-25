@@ -1,3 +1,0 @@
-source https://www.nuget.org/api/v2
-
-nuget FSharp.Compiler.Service 26.0.1 prerelease restriction: >= net461

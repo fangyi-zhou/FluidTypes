@@ -9,19 +9,18 @@ jobs:
 
       - restore_cache:
           keys:
-            - deps-{{ checksum "paket.dependencies" }}
+            - deps-{{ checksum "Fluid/packages.config" }}
             - deps-
 
       - run:
           name: Restore dependencies
-          command: mono .paket/paket.exe restore
+          command: nuget restore
 
       - run:
           name: Build
           command: msbuild
 
       - save_cache:
-          key: deps-{{ checksum "paket.dependencies" }}
+          key: deps-{{ checksum "Fluid/packages.config" }}
           paths:
             - packages
-            - paket-files
