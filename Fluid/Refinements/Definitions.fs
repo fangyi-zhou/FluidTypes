@@ -1,19 +1,20 @@
 namespace FluidTypes
 
 [<AutoOpen>]
-module Definitions = 
+module Definitions =
+    type Variable = string
 
     type Term = 
-    | Var of string
+    | Var of Variable
     | Const of Constant
     | App of Term * Term
-    | Abs of string (* variable *) * Term
+    | Abs of Variable * Term
     | IfThenElse of Term * Term * Term
     | Anno of Term * Ty
     | Coerce of Term * Ty
     and Ty =
     | BaseType of BaseTy * Term
-    | FuncType of string (* variable *) * Ty (* of argument *) * Ty (* of result *)
+    | FuncType of Variable * Ty (* of argument *) * Ty (* of result *)
     and BaseTy =
     | TBool
     | TInt
@@ -40,6 +41,6 @@ module Definitions =
     | Negate
 
     type TyCtx = {
-        varCtx: Map<string, Ty>;
+        varCtx: Map<Variable, Ty>;
         predicateCtx: List<Term>;
     }
