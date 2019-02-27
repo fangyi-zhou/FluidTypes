@@ -20,6 +20,6 @@ module FreeVar =
     and free_var_ty (ty: Ty) : Set<Variable> =
         match ty with
         | BaseType (_, term) ->
-            Set.remove "$this" (free_var_term term)
+            Set.remove special_this (free_var_term term)
         | FuncType (v, t_arg, t_result) ->
             Set.union (free_var_ty t_arg) (Set.remove v (free_var_ty t_result))

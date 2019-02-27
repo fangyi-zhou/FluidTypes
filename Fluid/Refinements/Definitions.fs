@@ -44,3 +44,5 @@ module Definitions =
         varCtx: Map<Variable, Ty>;
         predicateCtx: List<Term>;
     }
+
+    let special_this : Variable = "$this"

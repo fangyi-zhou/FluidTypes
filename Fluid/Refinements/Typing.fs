@@ -1,7 +1,6 @@
 ﻿namespace FluidTypes
 
 module Typing = 
-
     let empty_ctx : TyCtx = {varCtx = Map.empty; predicateCtx = []}
     
     let mk_this_eq_term (base_ty: BaseTy) (t: Term) : Term =
@@ -10,7 +9,7 @@ module Typing =
             | TInt -> EqualInt
             | TBool -> EqualBool
         in
-        App (App (Const (Binop eq), (Var "$this")), t)
+        App (App (Const (Binop eq), (Var special_this)), t)
         
     let env_add_var (v: string) (ty: Ty) (ty_ctx: TyCtx) : TyCtx =
         (* TODO: Renaming *)
