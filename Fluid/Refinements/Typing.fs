@@ -11,7 +11,7 @@ module Typing =
         in
         App (App (Const (Binop eq), (Var special_this)), t)
         
-    let env_add_var (v: string) (ty: Ty) (ty_ctx: TyCtx) : TyCtx =
+    let env_add_var (v: Variable) (ty: Ty) (ty_ctx: TyCtx) : TyCtx =
         (* TODO: Renaming *)
         {ty_ctx with varCtx = Map.add v ty ty_ctx.varCtx}
         
@@ -62,7 +62,9 @@ module Typing =
             match infer_type ctx term_1 with
             | Some (FuncType (v, t_arg, t_result)) ->
                 if check_type ctx term_2 t_arg
-                then (* t_result[t2/v] *) failwith "Unimplemented"
+                then
+                    (* t_result [term_2 / v] *)
+                    Some (Substitution.substitute_ty t_result v term_2)
                 else None
             | _ ->
                 None
@@ -99,10 +101,63 @@ module Typing =
         else false
         
     and is_wf_type (ctx: TyCtx) (ty: Ty) : bool =
-        false
+        let free_vars = FreeVar.free_var_ty ty in
+        let var_ctx = ctx.varCtx in
+        (* Check FV(ty) is a subset of dom(Gamma) *)
+        if Set.forall (fun fv -> Map.containsKey fv var_ctx) free_vars
+        then begin
+            match ty with
+            | BaseType (_, term) -> check_simple_type ctx term (mk_basetype TBool)
+            | FuncType (v, t_arg, t_result) ->
+                if is_wf_type ctx t_arg
+                then begin
+                    let ctx_ = env_add_var v t_arg ctx in
+                    is_wf_type ctx_ t_result
+                end
+                else false
+            end
+        else false
+        
+    and eq_simple_ty (ty_1: Ty) (ty_2: Ty) =
+        match ty_1, ty_2 with
+        | BaseType (base_1, _), BaseType (base_2, _) ->
+            base_1 = base_2
+        | FuncType (_, t_arg_1, t_result_1), FuncType(_, t_arg_2, t_result_2) ->
+            eq_simple_ty t_arg_1 t_arg_2 && eq_simple_ty t_result_1 t_result_2
+        | _, _ -> false
+    
+    and infer_simple_type (ctx: TyCtx) (term: Term) : Ty option =
+        match term with
+        | Var _
+        | Const _ -> infer_type ctx term
+        | App (term_1, term_2) ->
+            match infer_simple_type ctx term_1 with
+            | Some (FuncType (_, t_arg, t_result)) when check_simple_type ctx term_2 t_arg ->
+                Some t_result
+            | _ -> None
+        | Anno (term_, ty)
+        | Coerce (term_, ty) ->
+            if check_simple_type ctx term_ ty
+            then Some ty
+            else None
+        | _ -> None
 
-    and check_simple_type (ctx: TyCtx) (term: Term) (ty: Ty) : bool = 
-        false
+    and check_simple_type (ctx: TyCtx) (term: Term) (ty: Ty) : bool =
+        match term with
+        | Abs (v, term_) ->
+            match ty with
+            | FuncType (_, t_arg, t_result) ->
+                let ctx' = env_add_var v t_arg ctx in
+                check_simple_type ctx' term_ t_result
+            | _ -> false
+        | IfThenElse (term_cond, term_then, term_else) ->
+            check_simple_type ctx term_cond (mk_basetype TBool)
+            && check_simple_type ctx term_then ty
+            && check_simple_type ctx term_else ty
+        | _ ->
+            match infer_simple_type ctx term with
+            | Some ty_ -> eq_simple_ty ty ty_
+            | _ -> false
         
     and is_subtype (ctx: TyCtx) (ty_1: Ty) (ty_2: Ty): bool =
         false
