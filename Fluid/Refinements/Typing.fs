@@ -160,4 +160,12 @@ module Typing =
             | _ -> false
         
     and is_subtype (ctx: TyCtx) (ty_1: Ty) (ty_2: Ty): bool =
-        false
+        match ty_1, ty_2 with
+        | BaseType (basety_1, term_1), BaseType (basety_2, term_2) ->
+            basety_1 = basety_2
+            && Encoding.check_subtype ctx term_1 term_2
+        | FuncType (v_1, t_arg_1, t_result_1), FuncType (v_2, t_arg_2, t_result_2) when v_1 = v_2 ->
+            let ctx_ = env_add_var v_1 t_arg_2 ctx in 
+            is_subtype ctx t_arg_2 t_arg_1
+            && is_subtype ctx_ t_result_1 t_result_2
+        | _ -> false
