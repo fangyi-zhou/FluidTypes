@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: fsharp
+      - image: fangyizhou/fluidtypes
 
     steps:
       - checkout
