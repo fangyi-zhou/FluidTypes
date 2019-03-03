@@ -15,7 +15,7 @@ module CheckSolver =
     open FluidTypes.Solver
     open NUnit.Framework
     open FsUnit
-    
+
     let sample_formula_1 (* UNSAT *) = """(declare-const b Int)
 (declare-const x Int)
 (assert (= b (+ x 0)))
@@ -32,7 +32,7 @@ module CheckSolver =
     [<Test>]
     let ``Sample Formula 1 is UNSAT`` () =
         run_solver default_options sample_formula_1 |> should contain "unsat"
-        
+
     [<Test>]
     let ``Sample Formula 2 is SAT`` () =
         let result = run_solver default_options sample_formula_2 in

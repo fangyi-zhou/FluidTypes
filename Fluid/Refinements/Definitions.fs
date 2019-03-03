@@ -4,7 +4,7 @@ namespace FluidTypes
 module Definitions =
     type Variable = string
 
-    type Term = 
+    type Term =
     | Var of Variable
     | Const of Constant
     | App of Term * Term
@@ -18,7 +18,7 @@ module Definitions =
     and BaseTy =
     | TBool
     | TInt
-    and Constant = 
+    and Constant =
     | IntLiteral of int
     | BoolLiteral of bool
     | Binop of Binop
@@ -46,10 +46,10 @@ module Definitions =
     }
 
     let special_this : Variable = "$this"
-    
+
     type EncodingEnv = {
         consts: Map<Variable, BaseTy>;
         functions: Map<Variable, Variable * Term>;
         clauses: Set<Term>;
     }
-    
+

@@ -1,15 +1,15 @@
 ﻿namespace FluidTypes
 
-module Typing = 
+module Typing =
     let empty_ctx : TyCtx = {varCtx = Map.empty; predicateCtx = []}
-    
+
     let env_add_var (v: Variable) (ty: Ty) (ty_ctx: TyCtx) : TyCtx =
         (* TODO: Renaming *)
         {ty_ctx with varCtx = Map.add v ty ty_ctx.varCtx}
-        
+
     let env_add_predicate (predicate: Term) (ty_ctx: TyCtx) : TyCtx =
         {ty_ctx with predicateCtx = predicate :: ty_ctx.predicateCtx}
-    
+
     let type_const (c: Constant) : Ty =
         match c with
         | IntLiteral _ -> BaseType (TInt, mk_this_eq_term TInt (Const c))
@@ -38,7 +38,7 @@ module Typing =
             then Some ty
             else None
         | _ -> None
-    
+
     and check_type (ctx: TyCtx) (term: Term) (ty: Ty) : bool =
         if is_wf_type ctx ty
         then begin
@@ -64,7 +64,7 @@ module Typing =
                 | None -> false
         end
         else false
-        
+
     and is_wf_type (ctx: TyCtx) (ty: Ty) : bool =
         let free_vars = FreeVar.free_var_ty ty in
         let var_ctx = ctx.varCtx in
@@ -82,7 +82,7 @@ module Typing =
                 else false
             end
         else false
-        
+
     and eq_simple_ty (ty_1: Ty) (ty_2: Ty) =
         match ty_1, ty_2 with
         | BaseType (base_1, _), BaseType (base_2, _) ->
@@ -90,7 +90,7 @@ module Typing =
         | FuncType (_, t_arg_1, t_result_1), FuncType(_, t_arg_2, t_result_2) ->
             eq_simple_ty t_arg_1 t_arg_2 && eq_simple_ty t_result_1 t_result_2
         | _, _ -> false
-    
+
     and infer_simple_type (ctx: TyCtx) (term: Term) : Ty option =
         match term with
         | Var _
@@ -123,7 +123,7 @@ module Typing =
             match infer_simple_type ctx term with
             | Some ty_ -> eq_simple_ty ty ty_
             | _ -> false
-        
+
     and is_subtype (ctx: TyCtx) (ty_1: Ty) (ty_2: Ty): bool =
         match ty_1, ty_2 with
         | BaseType (basety_1, term_1), BaseType (basety_2, term_2) ->
@@ -131,7 +131,7 @@ module Typing =
             (* TODO: Load encodingoptions properly *)
             && Encoding.check_subtype Encoding.default_options ctx term_1 term_2
         | FuncType (v_1, t_arg_1, t_result_1), FuncType (v_2, t_arg_2, t_result_2) when v_1 = v_2 ->
-            let ctx_ = env_add_var v_1 t_arg_2 ctx in 
+            let ctx_ = env_add_var v_1 t_arg_2 ctx in
             is_subtype ctx t_arg_2 t_arg_1
             && is_subtype ctx_ t_result_1 t_result_2
         | FuncType (v_1, t_arg_1, t_result_1), FuncType (v_2, t_arg_2, t_result_2) ->
