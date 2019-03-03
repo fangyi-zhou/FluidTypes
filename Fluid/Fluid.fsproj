@@ -52,9 +52,9 @@
     <Compile Include="Refinements\Utils.fs" />
     <Compile Include="Refinements\FreeVar.fs" />
     <Compile Include="Refinements\Substitution.fs" />
+    <Compile Include="Refinements\Solver.fs" />
     <Compile Include="Refinements\Encoding.fs" />
     <Compile Include="Refinements\Typing.fs" />
-    <Compile Include="Refinements\Solver.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

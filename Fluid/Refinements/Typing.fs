@@ -128,7 +128,8 @@ module Typing =
         match ty_1, ty_2 with
         | BaseType (basety_1, term_1), BaseType (basety_2, term_2) ->
             basety_1 = basety_2
-            && Encoding.check_subtype ctx term_1 term_2
+            (* TODO: Load encodingoptions properly *)
+            && Encoding.check_subtype Encoding.default_options ctx term_1 term_2
         | FuncType (v_1, t_arg_1, t_result_1), FuncType (v_2, t_arg_2, t_result_2) when v_1 = v_2 ->
             let ctx_ = env_add_var v_1 t_arg_2 ctx in 
             is_subtype ctx t_arg_2 t_arg_1

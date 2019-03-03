@@ -13,7 +13,6 @@ module Solver =
         options = "";
     }
     
-
     let run_solver (opt: SolverOptions) (formula : string) : string =
         let tempfile = System.IO.Path.GetTempFileName () in
         let writer = new System.IO.StreamWriter (tempfile) in
@@ -48,3 +47,4 @@ module Solver =
         p.WaitForExit ();
         List.foldBack (fun acc v -> acc + "\n" + v) !outputs ""
         
+    let solve_encoding (env: EncodingEnv) : bool = (* TODO *) false

@@ -46,3 +46,10 @@ module Definitions =
     }
 
     let special_this : Variable = "$this"
+    
+    type EncodingEnv = {
+        consts: Map<Variable, BaseTy>;
+        functions: Map<Variable, Variable * Term>;
+        clauses: Set<Term>;
+    }
+    
