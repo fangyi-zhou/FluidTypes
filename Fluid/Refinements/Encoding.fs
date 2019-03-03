@@ -17,12 +17,14 @@ module Encoding =
     }
 
     let encode_term (opt: EncodingOptions) (env: EncodingEnv) (term: Term) : EncodingEnv =
-        (* TODO *)
-        env
+        {env with clauses = Set.add term env.clauses}
 
     let encode_ctx_var (opt: EncodingOptions) (env: EncodingEnv) (x: Variable) (ty: Ty) : EncodingEnv =
-        (* TODO *)
-        env
+        match ty with
+        | BaseType (b, term) ->
+            let env = encode_term opt env (Substitution.substitute_term (Var x) special_this term)
+            {env with consts = Map.add x b env.consts }
+        | FuncType _ -> env
 
     let encode_ctx (opt: EncodingOptions) (env: EncodingEnv) (ctx: TyCtx) : EncodingEnv =
         let var_ctx = ctx.varCtx in
