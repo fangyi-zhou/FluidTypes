@@ -134,4 +134,6 @@ module Typing =
             let ctx_ = env_add_var v_1 t_arg_2 ctx in 
             is_subtype ctx t_arg_2 t_arg_1
             && is_subtype ctx_ t_result_1 t_result_2
+        | FuncType (v_1, t_arg_1, t_result_1), FuncType (v_2, t_arg_2, t_result_2) ->
+            is_subtype ctx ty_1 (Substitution.alpha_conv_ty v_2 v_1 t_result_2)
         | _ -> false
