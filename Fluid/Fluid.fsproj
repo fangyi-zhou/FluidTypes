@@ -49,6 +49,7 @@
     <None Include="App.config" />
     <Content Include="packages.config" />
     <Compile Include="Refinements\Definitions.fs" />
+    <Compile Include="Refinements\Utils.fs" />
     <Compile Include="Refinements\FreeVar.fs" />
     <Compile Include="Refinements\Substitution.fs" />
     <Compile Include="Refinements\Encoding.fs" />

@@ -3,47 +3,12 @@
 module Typing = 
     let empty_ctx : TyCtx = {varCtx = Map.empty; predicateCtx = []}
     
-    let mk_this_eq_term (base_ty: BaseTy) (t: Term) : Term =
-        let eq =
-            match base_ty with
-            | TInt -> EqualInt
-            | TBool -> EqualBool
-        in
-        App (App (Const (Binop eq), (Var special_this)), t)
-        
     let env_add_var (v: Variable) (ty: Ty) (ty_ctx: TyCtx) : TyCtx =
         (* TODO: Renaming *)
         {ty_ctx with varCtx = Map.add v ty ty_ctx.varCtx}
         
     let env_add_predicate (predicate: Term) (ty_ctx: TyCtx) : TyCtx =
         {ty_ctx with predicateCtx = predicate :: ty_ctx.predicateCtx}
-    
-    let mk_basetype (base_ty: BaseTy) : Ty =
-        BaseType (base_ty, Const (BoolLiteral true))
-        
-    let mk_not (term: Term) : Term =
-        App (Const (Unop Not), term)
-    
-    let mk_binop_type (b: Binop) : Ty =
-        let binop_term = App (App (Const (Binop b), (Var "x")), (Var "y")) in
-        let ty_arg, ty_result =
-            match b with
-            | Plus | Minus -> TInt, TInt
-            | And | Or | EqualBool | NotEqualBool -> TBool, TBool
-            | EqualInt | NotEqualInt | Greater | GreaterEqual | Less | LessEqual -> TInt, TBool
-        in
-        let refinement_term = mk_this_eq_term ty_result binop_term in
-        FuncType ("x", mk_basetype ty_arg, (FuncType ("y", mk_basetype ty_arg, BaseType (ty_result, refinement_term))))
-        
-    let mk_unop_type (u: Unop) : Ty =
-        let unop_term = App (Const (Unop u), (Var "x")) in 
-        let ty_arg, ty_result =
-            match u with
-            | Negate -> TInt, TInt
-            | Not -> TBool, TBool
-        in
-        let refinement_term = mk_this_eq_term ty_result unop_term in
-        FuncType ("x", mk_basetype ty_arg, BaseType (ty_result, refinement_term))
     
     let type_const (c: Constant) : Ty =
         match c with
