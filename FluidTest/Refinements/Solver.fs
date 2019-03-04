@@ -1,17 +1,6 @@
-﻿namespace FluidTest
+namespace FluidTypes.Test
 
-module TypingTest =
-    open NUnit.Framework
-    open FluidTypes
-    open FluidTypes.Typing
-    open FsUnit
-
-    [<Test>]
-    let ``Int Literals have correct types`` () =
-        infer_type empty_ctx (mk_int 42) |> should equal (Some (BaseType (TInt, (mk_equal_int 42))))
-
-
-module CheckSolver =
+module SolverTest =
     open FluidTypes.Solver
     open NUnit.Framework
     open FsUnit
@@ -31,10 +20,14 @@ module CheckSolver =
 """
     [<Test>]
     let ``Sample Formula 1 is UNSAT`` () =
-        run_solver default_options sample_formula_1 |> should contain "unsat"
+        run_solver default_options sample_formula_1 |> should contain "unsat";
+        is_unsat default_options sample_formula_1 |> should equal true
+
 
     [<Test>]
     let ``Sample Formula 2 is SAT`` () =
         let result = run_solver default_options sample_formula_2 in
-        result |> should contain "sat"
-        result |> should not' (contain "unsat")
+        result |> should contain "sat";
+        result |> should not' (contain "unsat");
+        is_unsat default_options sample_formula_2 |> should equal false
+

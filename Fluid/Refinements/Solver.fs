@@ -15,7 +15,7 @@ module Solver =
 
     exception UnEncodable
 
-    let run_solver (opt: SolverOptions) (formula : string) : string =
+    let run_solver (opt: SolverOptions) (formula : string) : string list =
         let tempfile = System.IO.Path.GetTempFileName () in
         let writer = new System.IO.StreamWriter (tempfile) in
         writer.Write (formula);
@@ -32,7 +32,7 @@ module Solver =
         let outputHandler f (_sender:obj) (args:DataReceivedEventArgs) = f args.Data in
         let outputs = ref [] in
         let errors = ref [] in
-        let prepend ref_l v = ref_l := v :: !ref_l in
+        let prepend ref_l v = if v <> "" then ref_l := v :: !ref_l in
         let p = new Process(StartInfo = proc_info) in
         p.OutputDataReceived.AddHandler (DataReceivedEventHandler (outputHandler (prepend outputs)));
         p.ErrorDataReceived.AddHandler (DataReceivedEventHandler (outputHandler (prepend errors)));
@@ -47,11 +47,11 @@ module Solver =
         p.BeginOutputReadLine ();
         p.BeginErrorReadLine ();
         p.WaitForExit ();
-        List.foldBack (fun acc v -> acc + "\n" + v) !outputs ""
+        !outputs
 
     let is_unsat (opt: SolverOptions) (formula : string) : bool =
         let result = run_solver opt formula in
-        result = "unsat\n"
+        List.exists (fun v -> v = "unsat") result
 
     let solve_encoding (env: EncodingEnv) : bool =
         let smt_script = ref [] in
