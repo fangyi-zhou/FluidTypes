@@ -25,9 +25,12 @@ jobs:
           command: |
             curl -L -O https://raw.githubusercontent.com/nunit/nunit-transforms/master/nunit3-junit/nunit3-junit.xslt
             mkdir junit
-            mono packages/NUnit.ConsoleRunner.3.9.0/tools/nunit3-console.exe FluidTest/FluidTest.fsproj --result=junit/junit.xml\;transform=nunit3-junit.xslt
+            mono packages/NUnit.ConsoleRunner.3.9.0/tools/nunit3-console.exe FluidTest/FluidTest.fsproj --result=junit/result.xml\;transform=nunit3-junit.xslt
 
       - store_test_results:
+          path: junit
+
+      - store_artifacts:
           path: junit
 
       - save_cache:
