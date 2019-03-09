@@ -12,19 +12,19 @@ module FreeVarTest =
     let z = Var "z" in
     let this = Var special_this in
 
-    [<Property>]
+    [<Property(EndSize = 10)>]
     let ``FV of variable is itself`` (var: string) =
         free_var_term (Var var) |> should equal (Set.singleton var)
 
-    [<Property>]
+    [<Property(EndSize = 10)>]
     let ``FV of consts are always empty`` (c: Constant) =
         free_var_term (Const c) |> should equal Set.empty
 
-    [<Property>]
+    [<Property(EndSize = 10)>]
     let ``FV of lambdas does contain the bound variable`` (var: string) (term: Term) =
         free_var_term (Abs (var, term)) |> should not' (contain var)
 
-    [<Property>]
+    [<Property(EndSize = 10)>]
     let ``FV of base types does not contain special this`` (basety: BaseTy) (term: Term) =
         free_var_ty (BaseType (basety, term)) |> should not' (contain special_this)
 
