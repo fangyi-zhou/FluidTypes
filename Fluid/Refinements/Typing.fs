@@ -37,6 +37,12 @@ module Typing =
             if check_type ctx term ty
             then Some ty
             else None
+        | Coerce (term, (BaseType (b, _) as ty)) ->
+            let base_type_typecheck = check_type ctx term (mk_basetype b) in
+            let coercion_type_wf = is_wf_type ctx ty in
+            if base_type_typecheck && coercion_type_wf
+            then Some ty
+            else None
         | _ -> None
 
     and check_type (ctx: TyCtx) (term: Term) (ty: Ty) : bool =
@@ -72,7 +78,9 @@ module Typing =
         if Set.forall (fun fv -> Map.containsKey fv var_ctx) free_vars
         then begin
             match ty with
-            | BaseType (_, term) -> check_simple_type ctx term (mk_basetype TBool)
+            | BaseType (b, term) ->
+                let ctx = env_add_var special_this (mk_basetype b) ctx in
+                check_simple_type ctx term (mk_basetype TBool)
             | FuncType (v, t_arg, t_result) ->
                 if is_wf_type ctx t_arg
                 then begin

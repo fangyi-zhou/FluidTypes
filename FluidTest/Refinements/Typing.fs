@@ -38,6 +38,23 @@ module TypingTest =
         is_subtype ctx ty_1 ty_2 |> should equal true
 
     [<Test>]
+    let ``Well-formed Coercions are typable`` () =
+        let ctx = empty_ctx in
+        let ctx = env_add_var "x" (mk_basetype TInt) ctx in
+        let x = Var "x" in
+        let ty = BaseType (TInt, mk_equal_int 1) in
+        infer_type ctx (Coerce (x, ty)) |> should equal (Some ty)
+
+    [<Test>]
+    let ``Ill-formed Coercions are not typable`` () =
+        let ctx = empty_ctx in
+        let ctx = env_add_var "x" (mk_basetype TInt) ctx in
+        let x = Var "x" in
+        let y = Var "y" in
+        let ty = BaseType (TInt, mk_binop_app EqualInt x y) in
+        infer_type ctx (Coerce (x, ty)) |> should equal None
+
+    [<Test>]
     let ``Addition of int consts are typeable`` () =
         (* For some reason, this test hangs with FsCheck *)
         let x = 42 in
