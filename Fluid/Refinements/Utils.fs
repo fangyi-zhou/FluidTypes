@@ -2,6 +2,10 @@ namespace FluidTypes
 
 [<AutoOpen>]
 module Utils =
+    let mk_int i = Const (IntLiteral i)
+    let mk_bool b = Const (BoolLiteral b)
+
+    let mk_binop_app b x y = App (App (Const (Binop b), x), y)
 
     let mk_this_eq_term (base_ty: BaseTy) (t: Term) : Term =
         let eq =
@@ -9,7 +13,7 @@ module Utils =
             | TInt -> EqualInt
             | TBool -> EqualBool
         in
-        App (App (Const (Binop eq), (Var special_this)), t)
+        mk_binop_app eq (Var special_this) t
 
     let mk_basetype (base_ty: BaseTy) : Ty =
         BaseType (base_ty, Const (BoolLiteral true))
@@ -38,6 +42,5 @@ module Utils =
         let refinement_term = mk_this_eq_term ty_result unop_term in
         FuncType ("x", mk_basetype ty_arg, BaseType (ty_result, refinement_term))
 
-    let mk_int i = Const (IntLiteral i)
-
-    let mk_equal_int i = App (App (Const (Binop EqualInt), Var special_this), mk_int i)
+    let mk_equal_int i = mk_binop_app EqualInt (Var special_this) (mk_int i)
+    let mk_equal_bool b = mk_binop_app EqualBool (Var special_this) (mk_bool b)
