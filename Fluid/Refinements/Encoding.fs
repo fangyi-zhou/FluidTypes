@@ -22,8 +22,8 @@ module Encoding =
     let encode_ctx_var (opt: EncodingOptions) (env: EncodingEnv) (x: Variable) (ty: Ty) : EncodingEnv =
         match ty with
         | BaseType (b, term) ->
-            let env = encode_term opt env (Substitution.substitute_term (Var x) special_this term)
-            {env with consts = Map.add x b env.consts }
+            let env = encode_term opt env (Substitution.substitute_term term "x" (Var special_this))
+            {env with consts = Map.add x b env.consts}
         | FuncType _ -> env
 
     let encode_ctx (opt: EncodingOptions) (env: EncodingEnv) (ctx: TyCtx) : EncodingEnv =

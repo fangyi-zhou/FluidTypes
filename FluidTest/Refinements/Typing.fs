@@ -21,6 +21,23 @@ module TypingTest =
         is_subtype empty_ctx ty_1 ty_1 |> should equal true
 
     [<Test>]
+    let ``$this = n is a subtype of $this >= n`` () =
+        let n = 1 in
+        let ty_1 = BaseType (TInt, (mk_equal_int n)) in
+        let ty_2 = BaseType (TInt, (mk_binop_app GreaterEqual (Var special_this) (mk_int n))) in
+        is_subtype empty_ctx ty_1 ty_2 |> should equal true
+
+    [<Test>]
+    let ``$this = n is a subtype of $this >= n where n is in a context`` () =
+        let n = 1 in
+        let ctx = empty_ctx in
+        let ctx = env_add_var "n" (BaseType (TInt, mk_equal_int n)) ctx in
+        let n_term = Var "n" in
+        let ty_1 = BaseType (TInt, (mk_binop_app EqualInt (Var special_this) n_term)) in
+        let ty_2 = BaseType (TInt, (mk_binop_app GreaterEqual (Var special_this) n_term)) in
+        is_subtype ctx ty_1 ty_2 |> should equal true
+
+    [<Test>]
     let ``Addition of int consts are typeable`` () =
         (* For some reason, this test hangs with FsCheck *)
         let x = 42 in
