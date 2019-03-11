@@ -58,8 +58,9 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.Compiler.Service">
-      <HintPath>..\packages\FSharp.Compiler.Service.26.0.1\lib\net45\FSharp.Compiler.Service.dll</HintPath>
+    <Reference Include="FSharp.Compiler.Service, Version=27.0.1.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\FSharp.Compiler.Service.27.0.1\lib\net45\FSharp.Compiler.Service.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="FSharp.Core">
       <HintPath>..\packages\FSharp.Core.4.5.2\lib\net45\FSharp.Core.dll</HintPath>

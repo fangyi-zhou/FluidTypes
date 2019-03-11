@@ -1,4 +1,4 @@
-﻿open Microsoft.FSharp.Compiler.SourceCodeServices
+﻿open FSharp.Compiler.SourceCodeServices
 open Microsoft.FSharp.Core
 open System.IO
 
