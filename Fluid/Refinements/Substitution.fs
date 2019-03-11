@@ -1,7 +1,6 @@
-namespace FluidTypes
+namespace FluidTypes.Refinements
 
 module Substitution =
-
 
     let find_replacement_var (v: Variable) (excludes: Set<Variable>) : Variable =
         let rec aux i =

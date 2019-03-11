@@ -1,7 +1,7 @@
 namespace FluidTypes.Test
 
 module SolverTest =
-    open FluidTypes.Solver
+    open FluidTypes.Refinements.Solver
     open NUnit.Framework
     open FsUnit
 

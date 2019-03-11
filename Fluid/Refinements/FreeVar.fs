@@ -1,4 +1,4 @@
-namespace FluidTypes
+namespace FluidTypes.Refinements
 
 module FreeVar =
     let rec free_var_term (term: Term) : Set<Variable> =

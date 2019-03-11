@@ -1,8 +1,8 @@
 namespace FluidTypes.Test
 
 module SubstitutionTest =
-    open FluidTypes
-    open FluidTypes.Substitution
+    open FluidTypes.Refinements
+    open FluidTypes.Refinements.Substitution
     open FsCheck
     open NUnit.Framework
     open FsUnit

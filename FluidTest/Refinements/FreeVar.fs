@@ -2,8 +2,8 @@ namespace FluidTypes.Test
 
 module FreeVarTest =
     open NUnit.Framework
-    open FluidTypes
-    open FluidTypes.FreeVar
+    open FluidTypes.Refinements
+    open FluidTypes.Refinements.FreeVar
     open FsCheck.NUnit
     open FsUnit
 

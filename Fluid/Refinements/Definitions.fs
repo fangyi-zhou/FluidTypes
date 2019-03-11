@@ -1,4 +1,4 @@
-namespace FluidTypes
+namespace FluidTypes.Refinements
 
 [<AutoOpen>]
 module Definitions =

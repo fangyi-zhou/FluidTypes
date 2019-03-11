@@ -2,8 +2,8 @@
 
 module TypingTest =
     open NUnit.Framework
-    open FluidTypes
-    open FluidTypes.Typing
+    open FluidTypes.Refinements
+    open FluidTypes.Refinements.Typing
     open FsUnit
     open FsCheck.NUnit
 

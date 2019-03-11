@@ -1,4 +1,4 @@
-﻿namespace FluidTypes
+﻿namespace FluidTypes.Refinements
 
 module Typing =
     let empty_ctx : TyCtx = {varCtx = Map.empty; predicateCtx = []}

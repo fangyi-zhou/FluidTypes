@@ -1,4 +1,4 @@
-namespace FluidTypes
+namespace FluidTypes.Refinements
 
 module Solver =
     open System.Diagnostics
