@@ -46,7 +46,6 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <None Include="App.config" />
     <Content Include="packages.config" />
     <Compile Include="Refinements\Definitions.fs" />
     <Compile Include="Refinements\Utils.fs" />
@@ -55,6 +54,8 @@
     <Compile Include="Refinements\Solver.fs" />
     <Compile Include="Refinements\Encoding.fs" />
     <Compile Include="Refinements\Typing.fs" />
+    <Compile Include="Extraction\Extraction.fs" />
+    <None Include="App.config" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
