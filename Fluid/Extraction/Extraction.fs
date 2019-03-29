@@ -68,10 +68,10 @@ module Extraction =
                                 |> List.map (fun argument -> argument.FullName)
                 in
                 let e = List.foldBack (fun v -> fun e -> Abs (v, e)) arguments e in
-                let errors =
+                let errors, ctx  =
                     match Typing.infer_type ctx e with
-                    | Some ty -> []
-                    | None -> [TypeError (sprintf "Cannot infer type for %A" e)]
+                    | Some ty -> [], Typing.env_add_var member_or_func.FullName ty ctx
+                    | None -> [TypeError (sprintf "Cannot infer type for %A" e)], ctx
                 in
                 errors, ctx
             | FSharpImplementationFileDeclaration.InitAction _ ->
