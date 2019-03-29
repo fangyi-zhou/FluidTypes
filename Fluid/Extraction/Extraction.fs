@@ -3,6 +3,7 @@ namespace FluidTypes.Extraction
 module Extraction =
     open FSharp.Compiler.SourceCodeServices
     open FluidTypes.Refinements
+    open FluidTypes.Errors
 
     exception UnExtractable
 
@@ -53,17 +54,28 @@ module Extraction =
         | _ -> raise UnExtractable
 
 
-    let countDecl (fileContents : FSharpImplementationFileContents) =
+    let check_terms_in_decls (fileContents : FSharpImplementationFileContents) =
         let decl = fileContents.Declarations in
-        let rec checkDecl (decl : FSharpImplementationFileDeclaration) : int =
+        let rec check_term (ctx: TyCtx) (decl : FSharpImplementationFileDeclaration) : Error list * TyCtx =
             match decl with
             | FSharpImplementationFileDeclaration.Entity (_entity, decls) ->
-                List.sumBy checkDecl decls
+                let errors, ctx = List.mapFold check_term ctx decls in
+                List.concat errors, ctx
             | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue (member_or_func, arguments, e) ->
-                eprintf "Extraction: %A (%A) = %A\n" member_or_func arguments (extract_expr e);
-                1
+                let e = extract_expr e in
+                let arguments = List.concat arguments
+                                |> List.filter (fun argument -> argument.IsValue)
+                                |> List.map (fun argument -> argument.FullName)
+                in
+                let e = List.foldBack (fun v -> fun e -> Abs (v, e)) arguments e in
+                let errors =
+                    match Typing.infer_type ctx e with
+                    | Some ty -> []
+                    | None -> [TypeError (sprintf "Cannot infer type for %A" e)]
+                in
+                errors, ctx
             | FSharpImplementationFileDeclaration.InitAction _ ->
-                1
+                [], ctx
         in
-        let declCounts = List.map checkDecl decl in
-        List.sum declCounts
+        let ctx = Typing.empty_ctx in
+        List.mapFold check_term ctx decl |> fst

@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Content Include="packages.config" />
+    <Compile Include="Errors.fs" />
     <Compile Include="Refinements\Definitions.fs" />
     <Compile Include="Refinements\Utils.fs" />
     <Compile Include="Refinements\FreeVar.fs" />

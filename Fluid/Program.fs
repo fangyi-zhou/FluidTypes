@@ -21,6 +21,6 @@ let main argv =
         let results = checker.ParseAndCheckProject(projectOptions) |> Async.RunSynchronously
         in
         printf "%d Error(s)\n" (Array.length results.Errors)
-        let declCounts = List.map Extraction.countDecl results.AssemblyContents.ImplementationFiles in
-        printf "%d Declarations in the file(s)\n" (List.sum declCounts)
+        let terms = List.map Extraction.check_terms_in_decls results.AssemblyContents.ImplementationFiles in
+        printfn "Terms extracted %A" terms
         0
