@@ -1,11 +1,12 @@
 namespace FluidTypes.Extraction
 
 module Extraction =
+    open FSharp.Compiler.AbstractIL.Internal.Library
     open FSharp.Compiler.SourceCodeServices
     open FluidTypes.Refinements
     open FluidTypes.Errors
 
-    exception UnExtractable
+    exception UnExtractable of Error
 
     let rec extract_expr (e: FSharpExpr) : Term =
         match e with
@@ -48,12 +49,11 @@ module Extraction =
             match const_value_obj with
             | :?int -> Const (IntLiteral (const_value_obj :?> int))
             | :?bool -> Const (BoolLiteral (const_value_obj :?> bool))
-            | _ -> raise UnExtractable
+            | otherwise -> UnExtractable (ExtractionError (otherwise.ToString())) |> raise
         | BasicPatterns.Value (value_to_get) ->
             Var value_to_get.FullName
-        | _ -> raise UnExtractable
-
-
+        | otherwise -> UnExtractable (ExtractionError (otherwise.ToString())) |> raise
+        
     let check_terms_in_decls (fileContents : FSharpImplementationFileContents) =
         let decl = fileContents.Declarations in
         let rec check_term (ctx: TyCtx) (decl : FSharpImplementationFileDeclaration) : Error list * TyCtx =
@@ -77,5 +77,6 @@ module Extraction =
             | FSharpImplementationFileDeclaration.InitAction _ ->
                 [], ctx
         in
+        let check_term' ctx decl = try check_term ctx decl with | UnExtractable error -> [error], ctx in 
         let ctx = Typing.empty_ctx in
-        List.mapFold check_term ctx decl |> fst
+        List.mapFold check_term' ctx decl |> fst
