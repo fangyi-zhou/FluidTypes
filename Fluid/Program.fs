@@ -20,10 +20,16 @@ let main argv =
         in
         let results = checker.ParseAndCheckProject(projectOptions) |> Async.RunSynchronously
         in
-        printf "%d Compilation Error(s)\n" (Array.length results.Errors)
-        let errors = List.map Extraction.check_terms_in_decls results.AssemblyContents.ImplementationFiles in
-        if List.isEmpty errors
-        then 0
+        if Array.isEmpty results.Errors
+        then begin
+            let errors = List.map Extraction.check_terms_in_decls results.AssemblyContents.ImplementationFiles in
+            if List.isEmpty errors
+            then 0
+            else
+                printfn "FluidTypes Errors %A" errors;
+                1
+            end
         else
-            printfn "FluidTypes Errors %A" errors;
+            printfn "Input contains compilation errors:"
+            printfn "%A" results.Errors
             1
