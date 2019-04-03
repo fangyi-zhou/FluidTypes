@@ -1,6 +1,9 @@
 namespace FluidTypes.Refinements
 
 module Solver =
+    open System.IO
+    open System
+    open System.Runtime.InteropServices
     open System.Diagnostics
 
     type SolverOptions = {
@@ -8,8 +11,22 @@ module Solver =
         options: string;
     }
 
+    let find_z3 () =
+        let path = Environment.GetEnvironmentVariable "PATH" in
+        let directory = path.Split Path.PathSeparator in
+        let filename =
+            if System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            then "z3.exe"
+            else "z3"
+        in
+        let file_exist dir = File.Exists(Path.Combine (dir, filename)) in
+        let full_paths = Array.filter file_exist directory
+        if full_paths.Length = 0
+        then failwith "Z3 not found"
+        else Path.Combine (full_paths.[0], filename)
+
     let default_options: SolverOptions = {
-        path = "z3";
+        path = find_z3 ();
         options = "";
     }
 
