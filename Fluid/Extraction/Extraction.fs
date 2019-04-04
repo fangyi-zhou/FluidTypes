@@ -8,6 +8,14 @@ module Extraction =
 
     exception UnExtractable of Error
 
+    let counter = ref 0
+
+    let fresh_name () =
+        let name = sprintf "_%d" !counter in
+        counter := !counter + 1
+        name
+
+
     let rec extract_type (ty: FSharpType) (names: string list) : Ty =
         match ty with
         | Symbol.FunctionType ->
@@ -15,11 +23,17 @@ module Extraction =
             let args = List.ofSeq args in
             let rec conv_func_type args names =
                 match args, names with
-                | [arg], [] -> extract_type arg []
-                | arg :: args, name :: names ->
+                | [arg], _ -> extract_type arg []
+                | arg :: args, names ->
                     let ty_arg = extract_type arg [] in
+                    let name, names =
+                        match List.tryHead names with
+                        | Some name -> name, List.tail names
+                        | None -> fresh_name (), names
+                    in
                     FuncType (name, ty_arg, conv_func_type args names)
-                | _ -> failwith "Oops!"
+                | _ ->
+                    failwith "Extracting a function type without arguments"
             in
             conv_func_type args names
         | _ when ty.HasTypeDefinition ->
