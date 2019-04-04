@@ -51,9 +51,11 @@ module Typing =
             match term with
             | Abs (v, term_) ->
                 match ty with
-                | FuncType (v, t_arg, t_result) ->
+                | FuncType (v', t_arg, t_result) when v = v' ->
                     let ctx = env_add_var v t_arg ctx in
                     check_type ctx term_ t_result
+                | FuncType (v', _, _) ->
+                    check_type ctx term (Substitution.alpha_conv_ty v' v ty)
                 | _ -> false
             | IfThenElse (term_cond, term_then, term_else) ->
                 match infer_type ctx term_cond with
