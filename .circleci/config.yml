@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: fangyizhou/fluidtypes
+      - image: fangyizhou/fluidtypes:dotcore
 
     steps:
       - checkout
