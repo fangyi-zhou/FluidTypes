@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Errors.fs" />
+    <Compile Include="Refinements/Definitions.fs" />
+    <Compile Include="Refinements/Utils.fs" />
+    <Compile Include="Refinements/FreeVar.fs" />
+    <Compile Include="Refinements/Substitution.fs" />
+    <Compile Include="Refinements/Solver.fs" />
+    <Compile Include="Refinements/Encoding.fs" />
+    <Compile Include="Refinements/Typing.fs" />
+    <Compile Include="Extraction/Extraction.fs" />
+    <Compile Include="Main.fs" />
+  </ItemGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
+</Project>

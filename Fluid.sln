@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Fluid", "Fluid\Fluid.fsproj", "{BFD55126-1D9C-438A-A259-C0BAC7CEB784}"
-EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FluidTest", "FluidTest\FluidTest.fsproj", "{C0C0599A-5D2C-451B-818D-9D93BBE4820F}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FluidTypes", "src\FluidTypes.fsproj", "{3FE3B8E6-2A76-432B-B4DF-603E38C09DAC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BFD55126-1D9C-438A-A259-C0BAC7CEB784}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BFD55126-1D9C-438A-A259-C0BAC7CEB784}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BFD55126-1D9C-438A-A259-C0BAC7CEB784}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BFD55126-1D9C-438A-A259-C0BAC7CEB784}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C0C0599A-5D2C-451B-818D-9D93BBE4820F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C0C0599A-5D2C-451B-818D-9D93BBE4820F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0C0599A-5D2C-451B-818D-9D93BBE4820F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0C0599A-5D2C-451B-818D-9D93BBE4820F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FE3B8E6-2A76-432B-B4DF-603E38C09DAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FE3B8E6-2A76-432B-B4DF-603E38C09DAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FE3B8E6-2A76-432B-B4DF-603E38C09DAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FE3B8E6-2A76-432B-B4DF-603E38C09DAC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
