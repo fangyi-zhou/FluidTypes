@@ -9,7 +9,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - deps-{{ checksum "Fluid/packages.config" }}
+            - deps-{{ checksum "paket.lock" }}
             - deps-
 
       - run:
@@ -18,22 +18,16 @@ jobs:
 
       - run:
           name: Build
-          command: msbuild
+          command: |
+            dotnet build
 
       - run:
           name: Test
           command: |
-            curl -L -O https://raw.githubusercontent.com/nunit/nunit-transforms/master/nunit3-junit/nunit3-junit.xslt
-            mkdir junit
-            mono packages/NUnit.ConsoleRunner.3.9.0/tools/nunit3-console.exe FluidTest/FluidTest.fsproj --result=junit/result.xml\;transform=nunit3-junit.xslt
+            dotnet test
 
-      - store_test_results:
-          path: junit
-
-      - store_artifacts:
-          path: junit
 
       - save_cache:
-          key: deps-{{ checksum "Fluid/packages.config" }}
+          key: deps-{{ checksum "paket.lock" }}
           paths:
             - packages
