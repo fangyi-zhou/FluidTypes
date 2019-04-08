@@ -1,2 +1,8 @@
 source https://www.nuget.org/api/v2
+nuget FsCheck
+nuget FsCheck.NUnit
 nuget FSharp.Compiler.Service
+nuget FsUnit
+nuget Microsoft.NET.Test.Sdk
+nuget NUnit
+nuget NUnit3TestAdapter
