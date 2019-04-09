@@ -55,6 +55,8 @@
     <Compile Include="Refinements\Solver.fs" />
     <Compile Include="Refinements\Encoding.fs" />
     <Compile Include="Refinements\Typing.fs" />
+    <Compile Include="Annotations\AnnotationParser.fs" />
+    <Compile Include="Annotations\Refined.fs" />
     <Compile Include="Extraction\Extraction.fs" />
     <None Include="App.config" />
     <Compile Include="Program.fs" />
