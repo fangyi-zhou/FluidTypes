@@ -1,0 +1,24 @@
+%{
+open FluidTypes.Refinements
+%}
+
+%start expr
+%token <string> ID
+%token <int> INT
+%token LPAREN RPAREN PLUS MINUS EQUAL GREATER LESS NOT TRUE FALSE EOF
+%type < FluidTypes.Refinements.Definitions.Term > expr
+
+%%
+expr :
+      expr expr { App($1, $2) }
+    | ID { Var $1 }
+    | LPAREN expr RPAREN { $2 }
+    | INT { Const (IntLiteral $1) }
+    | TRUE { Const (BoolLiteral true) }
+    | FALSE { Const (BoolLiteral false) }
+    | NOT { Const (Unop Not) }
+    | PLUS { Const (Binop Plus) }
+    | MINUS { Const (Binop Minus) }
+    | EQUAL { Const (Binop EqualInt) }
+    | GREATER { Const (Binop Greater) }
+    | LESS { Const (Binop Less) }
