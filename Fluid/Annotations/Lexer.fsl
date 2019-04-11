@@ -25,8 +25,11 @@ rule token = parse
 | "+" { PLUS }
 | "-" { MINUS }
 | "=" { EQUAL }
-| "<" { GREATER }
-| ">" { LESS }
+| ">=" { GREATEREQUAL }
+| "<=" { LESSEQUAL }
+| "<>" { NOTEQUAL }
+| ">" { GREATER }
+| "<" { LESS }
 | "not" { NOT }
 | "true" { TRUE }
 | "false" { FALSE }

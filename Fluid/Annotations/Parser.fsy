@@ -2,29 +2,42 @@
 open FluidTypes.Refinements
 %}
 
-%start main
+%start expr
 %token <string> ID
 %token <int> INT
-%token LPAREN RPAREN PLUS MINUS EQUAL GREATER LESS NOT TRUE FALSE EOF
-%type < FluidTypes.Refinements.Definitions.Term > main
+%token LPAREN RPAREN
+%token PLUS MINUS
+%token EQUAL GREATER LESS GREATEREQUAL LESSEQUAL NOTEQUAL
+%token NOT
+%token TRUE FALSE
+%token EOF
+%type < FluidTypes.Refinements.Definitions.Term > expr
 %left PLUS MINUS
+%nonassoc EQUAL GREATER LESS
 
 %%
-main :
-    | expr EOF { $1 }
+expr:
+    | expr0 EOF { $1 }
 
-expr :
-    | expr PLUS expr { mk_binop_app Plus $1 $3 }
-    | expr MINUS expr { mk_binop_app Minus $1 $3 }
-    | expr1 { $1 }
+expr0:
+    | NOT expr0           { mk_not $2 }
+    | expr0 EQUAL expr0   { mk_binop_app EqualInt $1 $3 }
+    | expr0 GREATER expr0 { mk_binop_app Greater $1 $3 }
+    | expr0 LESS expr0    { mk_binop_app Less $1 $3 }
+    | expr0 GREATEREQUAL expr0 { mk_binop_app GreaterEqual $1 $3 }
+    | expr0 LESSEQUAL expr0    { mk_binop_app LessEqual $1 $3 }
+    | expr0 NOTEQUAL expr0     { mk_binop_app NotEqualInt $1 $3 }
+    | expr0 PLUS expr0    { mk_binop_app Plus $1 $3 }
+    | expr0 MINUS expr0   { mk_binop_app Minus $1 $3 }
+    | expr1               { $1 }
 
 expr1:
     | expr1 expr2 { App($1, $2) }
-    | expr2 { $1 }
+    | expr2       { $1 }
 
 expr2:
-    | ID { Var $1 }
-    | LPAREN expr RPAREN { $2 }
-    | INT { Const (IntLiteral $1) }
-    | TRUE { Const (BoolLiteral true) }
-    | FALSE { Const (BoolLiteral false) }
+    | ID                  { Var $1 }
+    | LPAREN expr0 RPAREN { $2 }
+    | INT                 { Const (IntLiteral $1) }
+    | TRUE                { Const (BoolLiteral true) }
+    | FALSE               { Const (BoolLiteral false) }

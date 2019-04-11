@@ -62,3 +62,35 @@ module AnnotationParserTest =
         parse "1 - 1" |> should equal ``1 - 1``
         parse "1 - 1 - x" |> should equal ``1 - 1 - x``
         parse "1 + 1 - x" |> should equal ``1 + 1 - x``
+
+    [<Test>]
+    let ``can parse relation operators`` () =
+        let parse = parse_term in
+        let x = Var "x" in
+        let one = mk_int 1 in
+        let ``x = 1`` = mk_binop_app EqualInt x one in
+        let ``x > 1`` = mk_binop_app Greater x one in
+        let ``x < 1`` = mk_binop_app Less x one in
+        parse "x = 1" |> should equal ``x = 1``
+        parse "x > 1" |> should equal ``x > 1``
+        parse "x < 1" |> should equal ``x < 1``
+
+    [<Test>]
+    let ``can parse logical operators`` () =
+        let parse = parse_term in
+        let x = Var "x" in
+        let y = Var "y" in
+        let ``x > y`` = mk_binop_app Greater x y in
+        let ``x <> y`` = mk_binop_app NotEqualInt x y in
+        let ``x < y`` = mk_binop_app Less x y in
+        let ``x = y`` = mk_binop_app EqualInt x y in
+        let ``x >= y`` = mk_binop_app GreaterEqual x y in
+        let ``x <= y`` = mk_binop_app LessEqual x y in
+        let ``not x`` = mk_not x in
+        parse "x > y" |> should equal ``x > y``
+        parse "x < y" |> should equal ``x < y``
+        parse "x <> y" |> should equal ``x <> y``
+        parse "x = y" |> should equal ``x = y``
+        parse "x >= y" |> should equal ``x >= y``
+        parse "x <= y" |> should equal ``x <= y``
+        parse "not x" |> should equal ``not x``
