@@ -92,3 +92,14 @@ module AnnotationParserTest =
         let ``x + y`` = mk_binop_app Plus x y in
         let ``x + y = 1`` = mk_binop_app EqualInt ``x + y`` one in
         parse "x + y = 1" |> should equal ``x + y = 1``
+        parse "x + y = 1 && x + y = 1" |> should equal (mk_binop_app And ``x + y = 1`` ``x + y = 1``)
+
+    [<Test>]
+    let ``can parse logical operators`` () =
+        let parse = parse_term in
+        let x = Var "x" in
+        let y = Var "y" in
+        let ``x && y`` = mk_binop_app And x y in
+        let ``x || y`` = mk_binop_app Or x y in
+        parse "x && y" |> should equal ``x && y``
+        parse "x || y" |> should equal ``x || y``
