@@ -8,6 +8,6 @@ module AnnotationParser =
     let parse_term (input: string) : Term =
         let lexbuf = LexBuffer<char>.FromString input in
         try
-            Parser.expr Lexer.token lexbuf
+            Parser.main Lexer.token lexbuf
         with
         | e -> failwith (sprintf "Cannot parse %s" input)
