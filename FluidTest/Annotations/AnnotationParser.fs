@@ -67,18 +67,6 @@ module AnnotationParserTest =
     let ``can parse relation operators`` () =
         let parse = parse_term in
         let x = Var "x" in
-        let one = mk_int 1 in
-        let ``x = 1`` = mk_binop_app EqualInt x one in
-        let ``x > 1`` = mk_binop_app Greater x one in
-        let ``x < 1`` = mk_binop_app Less x one in
-        parse "x = 1" |> should equal ``x = 1``
-        parse "x > 1" |> should equal ``x > 1``
-        parse "x < 1" |> should equal ``x < 1``
-
-    [<Test>]
-    let ``can parse logical operators`` () =
-        let parse = parse_term in
-        let x = Var "x" in
         let y = Var "y" in
         let ``x > y`` = mk_binop_app Greater x y in
         let ``x <> y`` = mk_binop_app NotEqualInt x y in
@@ -94,3 +82,13 @@ module AnnotationParserTest =
         parse "x >= y" |> should equal ``x >= y``
         parse "x <= y" |> should equal ``x <= y``
         parse "not x" |> should equal ``not x``
+
+    [<Test>]
+    let ``can parse with mixed precedence`` () =
+        let parse = parse_term in
+        let x = Var "x" in
+        let y = Var "y" in
+        let one = mk_int 1 in
+        let ``x + y`` = mk_binop_app Plus x y in
+        let ``x + y = 1`` = mk_binop_app EqualInt ``x + y`` one in
+        parse "x + y = 1" |> should equal ``x + y = 1``

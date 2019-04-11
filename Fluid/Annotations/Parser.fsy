@@ -27,15 +27,18 @@ expr0:
     | expr0 GREATEREQUAL expr0 { mk_binop_app GreaterEqual $1 $3 }
     | expr0 LESSEQUAL expr0    { mk_binop_app LessEqual $1 $3 }
     | expr0 NOTEQUAL expr0     { mk_binop_app NotEqualInt $1 $3 }
-    | expr0 PLUS expr0    { mk_binop_app Plus $1 $3 }
-    | expr0 MINUS expr0   { mk_binop_app Minus $1 $3 }
     | expr1               { $1 }
 
 expr1:
-    | expr1 expr2 { App($1, $2) }
-    | expr2       { $1 }
+    | expr1 PLUS expr1    { mk_binop_app Plus $1 $3 }
+    | expr1 MINUS expr1   { mk_binop_app Minus $1 $3 }
+    | expr2               { $1 }
 
 expr2:
+    | expr2 expr3 { App($1, $2) }
+    | expr3       { $1 }
+
+expr3:
     | ID                  { Var $1 }
     | LPAREN expr0 RPAREN { $2 }
     | INT                 { Const (IntLiteral $1) }
