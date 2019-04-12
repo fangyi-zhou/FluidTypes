@@ -4,6 +4,7 @@ module Extraction =
     open FSharp.Compiler.AbstractIL.Internal.Library
     open FSharp.Compiler.SourceCodeServices
     open FluidTypes.Refinements
+    open FluidTypes.Annotations.AnnotationParser
     open FluidTypes.Errors
 
     exception UnExtractable of Error
@@ -15,6 +16,16 @@ module Extraction =
         counter := !counter + 1
         name
 
+    let is_refined_attribute (attribute: FSharpAttribute) =
+        let ty = attribute.AttributeType in
+        ty.FullName = "FluidTypes.Annotations.RefinedAttribute"
+
+    let find_refined_attribute (attributes: FSharpAttribute seq) =
+        Seq.tryHead (Seq.filter is_refined_attribute attributes)
+
+    let attribute_to_ty (attribute: FSharpAttribute) =
+        let refinement = attribute.ConstructorArguments.[0] |> snd :?> string in
+        parse_ty refinement
 
     let rec extract_type (ty: FSharpType) (names: string list) : Ty =
         match ty with
@@ -104,7 +115,13 @@ module Extraction =
                                 |> List.filter (fun argument -> argument.IsValue)
                 in
                 let argument_names = List.map (fun (arg : FSharpMemberOrFunctionOrValue) -> arg.FullName) arguments in
-                let ty = Option.map (fun ty -> extract_type ty argument_names) member_or_func.FullTypeSafe in
+                let refined_ty = find_refined_attribute member_or_func.Attributes in
+                let refined_ty = Option.map attribute_to_ty refined_ty in
+                let ty =
+                    match refined_ty with
+                    | Some _ as ty -> ty
+                    | None -> Option.map (fun ty -> extract_type ty argument_names) member_or_func.FullTypeSafe
+                in
                 let e = List.foldBack (fun arg -> fun e -> Abs (arg, e)) argument_names e in
                 let errors, ctx =
                     match ty with
