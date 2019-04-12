@@ -22,6 +22,10 @@ rule token = parse
 | newline { token lexbuf }
 | "(" { LPAREN }
 | ")" { RPAREN }
+| "{" { LBRACE }
+| "}" { RBRACE }
+| ":" { COLON }
+| "->" { RIGHTARROW }
 | "+" { PLUS }
 | "-" { MINUS }
 | "=" { EQUAL }
@@ -32,6 +36,7 @@ rule token = parse
 | "<>" { NOTEQUAL }
 | ">" { GREATER }
 | "<" { LESS }
+| "|" { BAR }
 | "not" { NOT }
 | "true" { TRUE }
 | "false" { FALSE }

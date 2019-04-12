@@ -1,6 +1,6 @@
 namespace FluidTypes.Test
 
-module AnnotationParserTest =
+module ExprParserTest =
     open NUnit.Framework
     open FsUnit
     open FluidTypes.Refinements

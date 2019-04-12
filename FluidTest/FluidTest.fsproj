@@ -77,7 +77,8 @@
     <Compile Include="Refinements\Substitution.fs" />
     <Compile Include="Refinements\Solver.fs" />
     <Compile Include="Refinements\Typing.fs" />
-    <Compile Include="Annotations\AnnotationParser.fs" />
+    <Compile Include="Annotations\ExprParser.fs" />
+    <Compile Include="Annotations\TyParser.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>

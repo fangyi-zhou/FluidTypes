@@ -1,11 +1,16 @@
 %{
 open FluidTypes.Refinements
+
+let conv_this (var: Variable) (term : Term) : Term = Substitution.alpha_conv_term var special_this term
 %}
 
 %start expr
+%start ty
 %token <string> ID
 %token <int> INT
 %token LPAREN RPAREN
+%token LBRACE RBRACE
+%token COLON RIGHTARROW BAR
 %token PLUS MINUS
 %token AND OR
 %token EQUAL GREATER LESS GREATEREQUAL LESSEQUAL NOTEQUAL
@@ -13,9 +18,11 @@ open FluidTypes.Refinements
 %token TRUE FALSE
 %token EOF
 %type < FluidTypes.Refinements.Definitions.Term > expr
+%type < FluidTypes.Refinements.Definitions.Ty > ty
 %left AND OR
 %left PLUS MINUS
-%nonassoc EQUAL GREATER LESS
+%right RIGHTARROW
+%nonassoc EQUAL GREATER LESS GREATEREQUAL NOTEQUAL LESSEQUAL
 
 %%
 expr:
@@ -51,3 +58,10 @@ expr4:
     | INT                 { Const (IntLiteral $1) }
     | TRUE                { Const (BoolLiteral true) }
     | FALSE               { Const (BoolLiteral false) }
+
+ty:
+    | ty0 EOF { $1 }
+
+ty0:
+    | LPAREN ID COLON ty0 RPAREN RIGHTARROW ty0 { FuncType ($2, $4, $7) }
+    | LBRACE ID COLON ID BAR expr0 RBRACE       { BaseType (read_basetype $4, conv_this $2 $6)}

@@ -11,3 +11,10 @@ module AnnotationParser =
             Parser.expr Lexer.token lexbuf
         with
         | e -> failwith (sprintf "Cannot parse %s" input)
+
+    let parse_ty (input: string) : Ty =
+        let lexbuf = LexBuffer<char>.FromString input in
+        try
+            Parser.ty Lexer.token lexbuf
+        with
+        | e -> failwith (sprintf "Cannot parse %s" input)

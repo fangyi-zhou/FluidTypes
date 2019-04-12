@@ -44,3 +44,9 @@ module Utils =
 
     let mk_equal_int i = mk_binop_app EqualInt (Var special_this) (mk_int i)
     let mk_equal_bool b = mk_binop_app EqualBool (Var special_this) (mk_bool b)
+
+    let read_basetype str =
+        match str with
+        | "int" -> TInt
+        | "bool" -> TBool
+        | _ -> failwith "Unknown type"
