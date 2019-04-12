@@ -1,3 +1,5 @@
+module Adder2
+
 let add7 x
   = x + 7
 

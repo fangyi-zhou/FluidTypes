@@ -1,3 +1,5 @@
+module Unextractable
+
 (* unextractable for now *)
 let one = 1
 let unused = "unused"

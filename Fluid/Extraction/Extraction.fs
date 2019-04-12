@@ -40,7 +40,7 @@ module Extraction =
             match ty.TypeDefinition.DisplayName with
             | "int" -> mk_basetype TInt
             | "bool" -> mk_basetype TBool
-            | _ -> failwith "Unknown type"
+            | _ -> failwithf "Unknown type %A" ty
         | _ ->
             failwith "Don't know how to deal with this type"
 

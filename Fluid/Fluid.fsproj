@@ -79,6 +79,10 @@
       <HintPath>..\packages\FSharp.Compiler.Service.27.0.1\lib\net45\FSharp.Compiler.Service.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="FSharp.Compiler.Service.ProjectCracker, Version=27.0.1.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\FSharp.Compiler.Service.ProjectCracker.27.0.1\lib\net45\FSharp.Compiler.Service.ProjectCracker.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FSharp.Core">
       <HintPath>..\packages\FSharp.Core.4.5.2\lib\net45\FSharp.Core.dll</HintPath>
     </Reference>
@@ -107,7 +111,9 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\FsLexYacc.8.0.1\build\FsLexYacc.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\FsLexYacc.8.0.1\build\FsLexYacc.targets'))" />
+    <Error Condition="!Exists('..\packages\FSharp.Compiler.Service.ProjectCracker.27.0.1\build\net45\FSharp.Compiler.Service.ProjectCracker.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\FSharp.Compiler.Service.ProjectCracker.27.0.1\build\net45\FSharp.Compiler.Service.ProjectCracker.targets'))" />
   </Target>
+  <Import Project="..\packages\FSharp.Compiler.Service.ProjectCracker.27.0.1\build\net45\FSharp.Compiler.Service.ProjectCracker.targets" Condition="Exists('..\packages\FSharp.Compiler.Service.ProjectCracker.27.0.1\build\net45\FSharp.Compiler.Service.ProjectCracker.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

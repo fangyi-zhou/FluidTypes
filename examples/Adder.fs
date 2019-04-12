@@ -1,5 +1,4 @@
-#I __SOURCE_DIRECTORY__
-#r "../FluidAnnotations/bin/Debug/net46/FluidAnnotations.dll"
+module Adder
 
 open FluidTypes.Annotations
 

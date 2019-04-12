@@ -16,6 +16,7 @@ let main argv =
             match Path.GetExtension filename with
             | ".fsx" -> checker.GetProjectOptionsFromScript(filename, filename) |> Async.RunSynchronously
             | ".fs" -> failwith "Unimplemented"
+            | ".fsproj" -> ProjectCracker.GetProjectOptionsFromProjectFile(filename), []
             | ext -> failwithf "Unsupported File Extension %s" ext
         in
         let results = checker.ParseAndCheckProject(projectOptions) |> Async.RunSynchronously
