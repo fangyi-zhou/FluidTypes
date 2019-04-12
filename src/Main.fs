@@ -7,6 +7,13 @@ module Main =
     open Microsoft.FSharp.Core
     open System.IO
 
+    (* FIXME: Remove this massive hack *)
+    let fixProjectOptions (projectOptions: FSharpProjectOptions) =
+      { projectOptions
+        with OtherOptions
+          = Array.append projectOptions.OtherOptions [|"-r:/usr/local/share/dotnet/shared/Microsoft.NETCore.App/2.1.6/System.Runtime.dll"|]
+      }
+
     [<EntryPoint>]
     let main argv =
         let checker = FSharpChecker.Create(keepAssemblyContents=true) in
@@ -22,6 +29,7 @@ module Main =
                 | ".fs" -> failwith "Unimplemented"
                 | ext -> failwithf "Unsupported File Extension %s" ext
             in
+            let projectOptions = fixProjectOptions projectOptions in
             let results = checker.ParseAndCheckProject(projectOptions) |> Async.RunSynchronously
             in
             if Array.isEmpty results.Errors
