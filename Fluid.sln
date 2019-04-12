@@ -7,6 +7,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Fluid", "Fluid\Fluid.fsproj
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FluidTest", "FluidTest\FluidTest.fsproj", "{C0C0599A-5D2C-451B-818D-9D93BBE4820F}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FluidAnnotations", "FluidAnnotations\FluidAnnotations.fsproj", "{A2D6118C-F2DA-465D-9BB4-E409249C8A35}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C0C0599A-5D2C-451B-818D-9D93BBE4820F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0C0599A-5D2C-451B-818D-9D93BBE4820F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0C0599A-5D2C-451B-818D-9D93BBE4820F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2D6118C-F2DA-465D-9BB4-E409249C8A35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2D6118C-F2DA-465D-9BB4-E409249C8A35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2D6118C-F2DA-465D-9BB4-E409249C8A35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2D6118C-F2DA-465D-9BB4-E409249C8A35}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

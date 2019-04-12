@@ -45,6 +45,11 @@
   </PropertyGroup>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
+    <ProjectReference Include="../FluidAnnotations/FluidAnnotations.fsproj">
+      <Name>FluidAnnotations.fsproj</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Content Include="packages.config" />
     <Compile Include="Errors.fs" />
@@ -65,7 +70,6 @@
     <Compile Include="Annotations\Parser.fs" />
     <Compile Include="Annotations\Lexer.fs" />
     <Compile Include="Annotations\AnnotationParser.fs" />
-    <Compile Include="Annotations\Refined.fs" />
     <Compile Include="Extraction\Extraction.fs" />
     <None Include="App.config" />
     <Compile Include="Program.fs" />
