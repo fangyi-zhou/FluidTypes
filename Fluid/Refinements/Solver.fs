@@ -7,7 +7,7 @@ module Solver =
     open System.Diagnostics
 
     type SolverOptions = {
-        path: string;
+        path: string option;
         options: string;
         log_queries: bool;
     }
@@ -27,14 +27,25 @@ module Solver =
         else Path.Combine (full_paths.[0], filename)
 
     let default_options: SolverOptions = {
-        path = find_z3 ();
+        path = None;
         options = "";
-        log_queries = true;
+        log_queries = false;
     }
+
+    let opt = ref default_options
+
+    let set_z3_path z3_path =
+        opt := {!opt with path = Some z3_path}
+
+    let set_log_queries log_queries =
+        opt := {!opt with log_queries = log_queries}
 
     exception UnEncodable
 
-    let run_solver (opt: SolverOptions) (formula : string) : string list =
+    let run_solver (formula : string) : string list =
+        if (!opt).path.IsNone then set_z3_path (find_z3 ())
+        let opt = !opt in
+        let path = Option.get opt.path in
         let time = System.DateTime.Now.ToBinary () in
         let log_file_writer =
             if opt.log_queries
@@ -58,7 +69,7 @@ module Solver =
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
-                FileName = opt.path,
+                FileName = path,
                 Arguments = if opt.options <> "" then (tempfile + " " + opt.options) else tempfile
         )
         let outputHandler f (_sender:obj) (args:DataReceivedEventArgs) = f args.Data in
@@ -72,10 +83,10 @@ module Solver =
             try
                 p.Start ()
             with | ex ->
-                ex.Data.Add ("filename", opt.path)
+                ex.Data.Add ("filename", path)
                 reraise ()
         if not started then
-            failwithf "Failed to start process %s" opt.path
+            failwithf "Failed to start process %s" path
         p.BeginOutputReadLine ();
         p.BeginErrorReadLine ();
         p.WaitForExit ();
@@ -84,8 +95,8 @@ module Solver =
         Option.iter (fun (writer: StreamWriter) -> writer.Close ()) log_file_writer;
         !outputs
 
-    let is_unsat (opt: SolverOptions) (formula : string) : bool =
-        let result = run_solver opt formula in
+    let is_unsat (formula : string) : bool =
+        let result = run_solver formula in
         List.exists (fun v -> v = "unsat") result
 
     let solve_encoding (env: EncodingEnv) : bool =
@@ -149,4 +160,4 @@ module Solver =
         Set.iter encode_term env.clauses;
         prepend smt_script "(check-sat)";
         let script = String.concat "\n" (List.rev !smt_script) in
-        is_unsat default_options script
+        is_unsat script

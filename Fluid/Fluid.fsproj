@@ -75,6 +75,10 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Argu, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\Argu.5.2.0\lib\net45\Argu.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="FSharp.Compiler.Service, Version=27.0.1.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\packages\FSharp.Compiler.Service.27.0.1\lib\net45\FSharp.Compiler.Service.dll</HintPath>
       <Private>True</Private>
