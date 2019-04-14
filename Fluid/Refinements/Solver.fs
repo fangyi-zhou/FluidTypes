@@ -9,6 +9,7 @@ module Solver =
     type SolverOptions = {
         path: string;
         options: string;
+        log_queries: bool;
     }
 
     let find_z3 () =
@@ -28,15 +29,29 @@ module Solver =
     let default_options: SolverOptions = {
         path = find_z3 ();
         options = "";
+        log_queries = true;
     }
 
     exception UnEncodable
 
     let run_solver (opt: SolverOptions) (formula : string) : string list =
+        let time = System.DateTime.Now.ToBinary () in
+        let log_file_writer =
+            if opt.log_queries
+            then
+                let filename = (sprintf "%u.log" time) in
+                let writer = new System.IO.StreamWriter (filename) in
+                Some writer
+            else None
+        in
+        let log (content : string) =
+            Option.iter (fun (writer: StreamWriter) -> writer.Write(content); writer.WriteLine ()) log_file_writer
+        in
         let tempfile = System.IO.Path.GetTempFileName () in
         let writer = new System.IO.StreamWriter (tempfile) in
         writer.Write (formula);
         writer.Close ();
+        log formula;
         (* http://www.fssnip.net/sw/title/RunProcess *)
         let proc_info =
             ProcessStartInfo(
@@ -64,6 +79,9 @@ module Solver =
         p.BeginOutputReadLine ();
         p.BeginErrorReadLine ();
         p.WaitForExit ();
+        log (String.concat "\n" !outputs)
+        log (String.concat "\n" !errors)
+        Option.iter (fun (writer: StreamWriter) -> writer.Close ()) log_file_writer;
         !outputs
 
     let is_unsat (opt: SolverOptions) (formula : string) : bool =
