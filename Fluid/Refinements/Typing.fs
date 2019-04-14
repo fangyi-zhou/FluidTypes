@@ -22,7 +22,10 @@ module Typing =
         let predicate_ctx = ctx.predicateCtx in
         match term with
         | Const c -> Some (type_const c)
-        | Var v -> Map.tryFind v var_ctx
+        | Var v ->
+            match Map.tryFind v var_ctx with
+            | Some (BaseType (b, _)) -> Some (BaseType (b, mk_binop_app EqualInt (Var special_this) (Var v)))
+            | ty -> ty
         | App (term_1, term_2) ->
             match infer_type ctx term_1 with
             | Some (FuncType (v, t_arg, t_result)) ->

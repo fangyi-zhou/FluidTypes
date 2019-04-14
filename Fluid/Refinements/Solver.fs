@@ -143,6 +143,7 @@ module Solver =
             try
                 prepend smt_script (sprintf "(assert %s)" (term_to_sexp term))
             with UnEncodable ->
+                printfn "Unencodable %A" term
                 ()
         in
         Set.iter encode_term env.clauses;

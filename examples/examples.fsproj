@@ -42,6 +42,7 @@
     <Compile Include="Adder.fs" />
     <Compile Include="Adder2.fs" />
     <Compile Include="Numbers.fs" />
+    <Compile Include="Abs.fs" />
   </ItemGroup>
   <Import Project="$(FSharpTargetsPath)" />
 </Project>
