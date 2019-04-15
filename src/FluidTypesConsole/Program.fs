@@ -26,7 +26,7 @@ let handle_args (results: ParseResults<CliArguments>) =
     then FluidTypes.Refinements.Solver.set_log_queries true;
     results.GetResult Input
 
-let process_input filename =
+let process_input (filename : string) =
     let checker = FSharpChecker.Create(keepAssemblyContents=true) in
     let projectOptions, errors =
         match Path.GetExtension filename with

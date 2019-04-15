@@ -1,0 +1,29 @@
+type file
+id FluidTypes
+title
+    FluidTypes
+owners
+    Fangyi Zhou
+authors 
+    Fangyi Zhou
+projectUrl
+    https://github.com/fangyi-zhou/FluidTypes
+iconUrl
+    https://raw.githubusercontent.com/fangyi-zhou/FluidTypes/master/docs/files/img/logo.png
+licenseUrl
+    https://github.com/fangyi-zhou/FluidTypes/blob/master/LICENSE
+requireLicenseAcceptance
+    false
+language
+    F#
+copyright
+    Copyright 2017
+tags
+    refinement type
+summary
+    A refinement type library for F#
+description
+    A refinement type library for F#
+
+files
+	../../bin/FluidTypes ==> lib

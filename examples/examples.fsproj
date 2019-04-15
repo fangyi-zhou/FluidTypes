@@ -45,4 +45,10 @@
     <Compile Include="Abs.fs" />
   </ItemGroup>
   <Import Project="$(FSharpTargetsPath)" />
+  <ItemGroup>
+    <Reference Include="FSharp.Core">
+      <HintPath>..\..\packages\FSharp.Core\lib\net45\FSharp.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
 </Project>
