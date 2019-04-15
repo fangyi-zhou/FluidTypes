@@ -10,8 +10,9 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Generators.fs" />
-    <Compile Include="Tests.fs" />
+    <Compile Include="Annotations/ExprParser.fs" />
+    <Compile Include="Annotations/TyParser.fs" />
+    <Compile Include="Refinements/Solver.fs" />
     <Compile Include="RunTests.fs" />
     <None Include="paket.references" />
   </ItemGroup>
