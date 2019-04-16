@@ -1,8 +1,8 @@
 namespace FluidTypes.Extraction
 
 module Extraction =
-    open FSharp.Compiler.AbstractIL.Internal.Library
-    open FSharp.Compiler.SourceCodeServices
+    open Microsoft.FSharp.Compiler.AbstractIL.Internal.Library
+    open Microsoft.FSharp.Compiler.SourceCodeServices
     open FluidTypes.Refinements
     open FluidTypes.Annotations.AnnotationParser
     open FluidTypes.Errors

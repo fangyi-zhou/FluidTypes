@@ -1,4 +1,4 @@
-﻿open FSharp.Compiler.SourceCodeServices
+﻿open Microsoft.FSharp.Compiler.SourceCodeServices
 open FluidTypes.Extraction
 open Microsoft.FSharp.Core
 open System.IO
