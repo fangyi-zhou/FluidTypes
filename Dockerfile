@@ -1,4 +1,4 @@
-FROM fsharp
+FROM fsharp:netcore
 
 RUN apt-get update && \
     apt-get install -y curl unzip libgomp1 && \
