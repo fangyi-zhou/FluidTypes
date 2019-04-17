@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\src\FluidTypes.Annotations\FluidTypes.Annotations.fsproj" />
+    <Compile Include="NestLet.fs" />
   </ItemGroup>
 
 </Project>

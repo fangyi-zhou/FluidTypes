@@ -108,6 +108,16 @@ module Extraction =
             printfn "Unknown Type %s without definition " typeName
             UnknownType(typeName + fresh_name())
 
+    let extract_ty_from_def (member_or_func: FSharpMemberOrFunctionOrValue) (argument_names: string list) =
+        let refined_ty = find_refined_attribute member_or_func.Attributes in
+        let refined_ty = Option.map attribute_to_ty refined_ty in
+        let ty =
+            match refined_ty with
+            | Some _ as ty -> ty
+            | None -> Option.map (fun ty -> extract_type ty argument_names) member_or_func.FullTypeSafe
+        in
+        ty
+
     let rec extract_expr (ctx : ExtractionCtx) (ty : Ty option) (e : FSharpExpr) : Term =
         let ty = extract_type ctx e.Type []
         match e with
@@ -181,6 +191,33 @@ module Extraction =
         | BasicPatterns.NewTuple(ty_, terms) ->
             let terms = List.map (extract_expr ctx None) terms
             Tuple(terms)
+                let const_value = const_value_obj.ToString() in
+                printfn "Unknown const %s" const_value;
+                UnknownTerm (const_value, extract_type const_type [])
+        | BasicPatterns.Value (value_to_get) ->
+            Var value_to_get.FullName
+        | BasicPatterns.Let ((binding_var, binding_expr), body_expr) ->
+            printfn "binding_var %A binding_expr %A body_expr %A" binding_var binding_expr body_expr
+            let binding_expr = extract_expr ctx None binding_expr in
+            let ty = extract_ty_from_def binding_var [] in
+            (* TODO: Remove code duplication *)
+            let errors, ctx =
+                match ty with
+                | Some ty ->
+                    if Typing.check_type ctx binding_expr ty
+                    then [], Typing.env_add_var binding_var.FullName ty ctx
+                    else [TypeError (sprintf "Incorrect Type %A for %A" ty binding_expr)], ctx
+                | None ->
+                    match Typing.infer_type ctx binding_expr with
+                    | Some ty -> [], Typing.env_add_var binding_var.FullName ty ctx
+                    | None -> [TypeError (sprintf "Cannot infer type for %A" binding_expr)], ctx
+            in
+            if not (List.isEmpty errors)
+            then
+                failwithf "TODO: Gracefully handle error %A" (List.head errors)
+            else
+                let body_expr = extract_expr ctx None body_expr in
+                body_expr
         | otherwise ->
             let e = e.ToString()
             printfn "Unknown expression %s" e
