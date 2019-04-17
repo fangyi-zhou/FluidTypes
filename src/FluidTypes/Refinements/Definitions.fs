@@ -15,6 +15,7 @@ module Definitions =
     and Ty =
     | BaseType of BaseTy * Term
     | FuncType of Variable * Ty (* of argument *) * Ty (* of result *)
+    | UnknownType of string
     and BaseTy =
     | TBool
     | TInt
@@ -52,4 +53,3 @@ module Definitions =
         functions: Map<Variable, Variable * Term>;
         clauses: Set<Term>;
     }
-

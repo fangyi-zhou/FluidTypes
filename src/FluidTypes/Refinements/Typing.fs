@@ -93,6 +93,7 @@ module Typing =
                     is_wf_type ctx_ t_result
                 end
                 else false
+            | UnknownType _ -> true
             end
         else false
 
@@ -149,4 +150,6 @@ module Typing =
             && is_subtype ctx_ t_result_1 t_result_2
         | FuncType (v_1, t_arg_1, t_result_1), FuncType (v_2, t_arg_2, t_result_2) ->
             is_subtype ctx ty_1 (Substitution.alpha_conv_ty v_2 v_1 t_result_2)
+        | UnknownType ty_1, UnknownType ty_2 ->
+            ty_1 = ty_2
         | _ -> false

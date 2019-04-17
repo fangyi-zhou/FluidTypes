@@ -23,3 +23,5 @@ module FreeVar =
             Set.remove special_this (free_var_term term)
         | FuncType (v, t_arg, t_result) ->
             Set.union (free_var_ty t_arg) (Set.remove v (free_var_ty t_result))
+        | UnknownType _ ->
+            Set.empty

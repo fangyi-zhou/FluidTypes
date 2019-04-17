@@ -1,4 +1,5 @@
 namespace FluidTypes.Extraction
+open System.Reflection.Metadata
 
 module Extraction =
     open Microsoft.FSharp.Compiler.AbstractIL.Internal.Library
@@ -51,9 +52,14 @@ module Extraction =
             match ty.TypeDefinition.DisplayName with
             | "int" -> mk_basetype TInt
             | "bool" -> mk_basetype TBool
-            | _ -> failwithf "Unknown type %A" ty
+            | _ ->
+                let typeName = ty.TypeDefinition.DisplayName in
+                printfn "Unknown Type: %s" typeName
+                UnknownType typeName
         | _ ->
-            failwith "Don't know how to deal with this type"
+            let typeName = ty.ToString()
+            printfn "Unknown Type %s without definition " typeName
+            UnknownType (typeName + fresh_name ())
 
     let rec extract_expr (e: FSharpExpr) : Term =
         let ty = extract_type e.Type [] in

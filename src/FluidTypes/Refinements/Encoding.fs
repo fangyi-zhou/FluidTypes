@@ -27,6 +27,7 @@ module Encoding =
             let env = encode_term env (Substitution.substitute_term term "x" (Var special_this))
             {env with consts = Map.add x b env.consts}
         | FuncType _ -> env
+        | UnknownType _ -> env
 
     let encode_ctx (env: EncodingEnv) (ctx: TyCtx) : EncodingEnv =
         let var_ctx = ctx.varCtx in
