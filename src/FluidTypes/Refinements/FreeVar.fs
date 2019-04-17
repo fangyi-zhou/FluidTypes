@@ -16,6 +16,8 @@ module FreeVar =
         | Anno (term_, ty)
         | Coerce (term_, ty) ->
             Set.union (free_var_term term_) (free_var_ty ty)
+        | UnknownTerm _ ->
+            Set.empty
 
     and free_var_ty (ty: Ty) : Set<Variable> =
         match ty with

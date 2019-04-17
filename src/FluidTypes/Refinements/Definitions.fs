@@ -1,5 +1,7 @@
 namespace FluidTypes.Refinements
 
+open Microsoft.FSharp.Compiler.SourceCodeServices
+
 [<AutoOpen>]
 module Definitions =
     type Variable = string
@@ -12,6 +14,7 @@ module Definitions =
     | IfThenElse of Term * Term * Term
     | Anno of Term * Ty
     | Coerce of Term * Ty
+    | UnknownTerm of string * Ty
     and Ty =
     | BaseType of BaseTy * Term
     | FuncType of Variable * Ty (* of argument *) * Ty (* of result *)

@@ -31,6 +31,7 @@ module Substitution =
             Anno (sub term_, substitute_ty ty x replace)
         | Coerce (term_, ty) ->
             Coerce (sub term_, substitute_ty ty x replace)
+        | UnknownTerm _ -> term
 
     and substitute_ty (ty: Ty) (x: Variable) (replace: Term) : Ty =
         match ty with

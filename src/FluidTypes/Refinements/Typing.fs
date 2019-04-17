@@ -46,6 +46,7 @@ module Typing =
             if base_type_typecheck && coercion_type_wf
             then Some ty
             else None
+        | UnknownTerm (_, ty) -> Some ty
         | _ -> None
 
     and check_type (ctx: TyCtx) (term: Term) (ty: Ty) : bool =
@@ -119,6 +120,7 @@ module Typing =
             if check_simple_type ctx term_ ty
             then Some ty
             else None
+        | UnknownTerm (_, ty) -> Some ty
         | _ -> None
 
     and check_simple_type (ctx: TyCtx) (term: Term) (ty: Ty) : bool =

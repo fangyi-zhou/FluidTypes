@@ -61,12 +61,14 @@ module Extraction =
             printfn "Unknown Type %s without definition " typeName
             UnknownType (typeName + fresh_name ())
 
-    let rec extract_expr (e: FSharpExpr) : Term =
+    let rec extract_expr (ty: Ty option) (e: FSharpExpr) : Term =
         let ty = extract_type e.Type [] in
         match e with
         | BasicPatterns.Application (func_expr, type_args, arg_exprs) ->
-            let func = extract_expr func_expr in
-            let args = List.map extract_expr arg_exprs in
+            (* FIXME: None in ty *)
+            let func = extract_expr None func_expr in
+            (* FIXME: None in ty *)
+            let args = List.map (extract_expr None) arg_exprs in
             List.fold (fun f a -> App (f, a)) func args
         | BasicPatterns.Call (obj_expr_opt, member_or_func, type_args1, type_args2, arg_exprs) ->
             let func =
@@ -83,8 +85,9 @@ module Extraction =
                 | "Microsoft.FSharp.Core.Operators.not" -> Const (Unop Not)
                 | name -> Var name
             in
-            let obj_opt = Option.map extract_expr obj_expr_opt in
-            let args = List.map extract_expr arg_exprs in
+            (* FIXME: None in ty *)
+            let obj_opt = Option.map (extract_expr None) obj_expr_opt in
+            let args = List.map (extract_expr None) arg_exprs in
             let func =
                 match obj_opt with
                 | Some o -> App (func, o)
@@ -92,21 +95,27 @@ module Extraction =
             in
             List.fold (fun f a -> App (f, a)) func args
         | BasicPatterns.IfThenElse (guard_expr, then_expr, else_expr) ->
-            let cond = extract_expr guard_expr in
-            let then_ = extract_expr then_expr in
-            let else_ = extract_expr else_expr in
+            let cond = extract_expr None guard_expr in
+            let then_ = extract_expr None then_expr in
+            let else_ = extract_expr None else_expr in
             IfThenElse (cond, then_, else_)
         | BasicPatterns.Lambda (lambda_var, body_expr) ->
-            let body = extract_expr body_expr in
+            let body = extract_expr None body_expr in
             Abs (lambda_var.FullName, body)
         | BasicPatterns.Const (const_value_obj, const_type) ->
             match const_value_obj with
             | :?int -> Const (IntLiteral (const_value_obj :?> int))
             | :?bool -> Const (BoolLiteral (const_value_obj :?> bool))
-            | otherwise -> UnExtractable (ExtractionError (otherwise.ToString())) |> raise
+            | otherwise ->
+                let const_value = const_value_obj.ToString() in
+                printfn "Unknown const %s" const_value;
+                UnknownTerm (const_value, extract_type const_type [])
         | BasicPatterns.Value (value_to_get) ->
             Var value_to_get.FullName
-        | otherwise -> UnExtractable (ExtractionError (otherwise.ToString())) |> raise
+        | otherwise ->
+            let e = e.ToString() in
+            printfn "Unknown expression %s" e;
+            UnknownTerm (e, ty)
 
     let check_terms_in_decls (fileContents : FSharpImplementationFileContents) =
         let decl = fileContents.Declarations in
@@ -116,7 +125,6 @@ module Extraction =
                 let errors, ctx = List.mapFold check_term ctx decls in
                 List.concat errors, ctx
             | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue (member_or_func, arguments, e) ->
-                let e = extract_expr e in
                 let arguments = List.concat arguments
                                 |> List.filter (fun argument -> argument.IsValue)
                 in
@@ -128,6 +136,7 @@ module Extraction =
                     | Some _ as ty -> ty
                     | None -> Option.map (fun ty -> extract_type ty argument_names) member_or_func.FullTypeSafe
                 in
+                let e = extract_expr ty e in
                 let e = List.foldBack (fun arg -> fun e -> Abs (arg, e)) argument_names e in
                 let errors, ctx =
                     match ty with
