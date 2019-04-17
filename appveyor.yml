@@ -3,6 +3,10 @@ image: Visual Studio 2017
 init:
   - git config --global core.autocrlf input
 build_script:
+  - ps: Invoke-WebRequest https://github.com/Z3Prover/z3/releases/download/z3-4.8.4/z3-4.8.4.d6df51951f4c-x64-win.zip -OutFile ".\z3.zip"
+  - ps: Expand-Archive ".\z3.zip" "."
+  - cmd: ren z3-4.8.4.d6df51951f4c-x64-win z3
+  - cmd: set PATH=%PATH%;%CD%\z3\bin;
   - cmd: build.cmd
 test: off
 version: 0.0.1.{build}
