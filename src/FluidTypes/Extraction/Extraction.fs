@@ -197,27 +197,19 @@ module Extraction =
         | BasicPatterns.Value (value_to_get) ->
             Var value_to_get.FullName
         | BasicPatterns.Let ((binding_var, binding_expr), body_expr) ->
-            printfn "binding_var %A binding_expr %A body_expr %A" binding_var binding_expr body_expr
+            (* `let var = e_1 in e_2` is converted into `(\var -> e2) e1` *)
+            (* But we need to make `(\var -> e1)` synthesisable *)
+            (* FIXME: We extract type for e2 from F# type,
+                      but that is not the most precise type and consequent subtyping may fail.
+                      To get this done properly, we can use annotated lambdas *)
             let binding_expr = extract_expr ctx None binding_expr in
-            let ty = extract_ty_from_def binding_var [] in
-            (* TODO: Remove code duplication *)
-            let errors, ctx =
-                match ty with
-                | Some ty ->
-                    if Typing.check_type ctx binding_expr ty
-                    then [], Typing.env_add_var binding_var.FullName ty ctx
-                    else [TypeError (sprintf "Incorrect Type %A for %A" ty binding_expr)], ctx
-                | None ->
-                    match Typing.infer_type ctx binding_expr with
-                    | Some ty -> [], Typing.env_add_var binding_var.FullName ty ctx
-                    | None -> [TypeError (sprintf "Cannot infer type for %A" binding_expr)], ctx
-            in
-            if not (List.isEmpty errors)
-            then
-                failwithf "TODO: Gracefully handle error %A" (List.head errors)
-            else
-                let body_expr = extract_expr ctx None body_expr in
-                body_expr
+            let ty_binding_opt = extract_ty_from_def binding_var [] in
+            let ty_binding = Option.get ty_binding_opt in (* FIXME *)
+            let ty_body = extract_type body_expr.Type [] in
+            let body_expr = extract_expr ctx None body_expr in
+            let lambda = Abs (binding_var.FullName, body_expr) in
+            let lambda = Anno (lambda, FuncType (fresh_name (), ty_binding, ty_body)) in
+            App (lambda, binding_expr)
         | otherwise ->
             let e = e.ToString()
             printfn "Unknown expression %s" e
