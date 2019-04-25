@@ -1,5 +1,12 @@
 module NestLet
 
+open FluidTypes.Annotations
+
 let nest x =
-  let f a b c = x + a + b + c in
-  f 1 2 3 + f 4 5 6
+  let twice = x + x in
+  twice
+
+let nest2 x =
+  let twice = x + x in
+  let twice_twice = twice + twice in
+  twice_twice
