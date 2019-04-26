@@ -140,26 +140,43 @@ module Extraction =
         let rec check_term (ctx: ExtractionCtx) (decl : FSharpImplementationFileDeclaration) : Error list * ExtractionCtx =
             match decl with
             | FSharpImplementationFileDeclaration.Entity (entity, decls) ->
-                let ty_map =
+                let error_opt, ty_map =
                     if entity.IsFSharpAbbreviation
-                    then Map.add entity.LogicalName (extract_type ctx entity.AbbreviatedType []) ctx.ty_map
-                    else ctx.ty_map
+                    then
+                        let ty_abbrev = extract_type ctx entity.AbbreviatedType [] in
+                        let refined_attribute = find_refined_attribute entity.Attributes in
+                        let refined_ty = Option.map attribute_to_ty refined_attribute in
+                        let refined_ty = Option.defaultValue ty_abbrev refined_ty in
+                        let tyctx = ctx.ty_ctx in
+                        if Typing.is_wf_type tyctx refined_ty && Typing.is_subtype tyctx refined_ty ty_abbrev
+                        then
+                            None, Map.add entity.LogicalName refined_ty ctx.ty_map
+                        else
+                            Some (TypeError (sprintf "Invalid refinement annotation %A" refined_attribute)), ctx.ty_map
+                    else None, ctx.ty_map
                 in
                 let ctx = {ctx with ty_map = ty_map} in
                 let errors, ctx = List.mapFold check_term ctx decls in
-                List.concat errors, ctx
+                let errors = List.concat errors in
+                let errors =
+                    match error_opt with
+                    | Some e -> e :: errors
+                    | None -> errors
+                in
+                errors, ctx
             | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue (member_or_func, arguments, e) ->
                 let arguments = List.concat arguments
                                 |> List.filter (fun argument -> argument.IsValue)
                 in
                 let argument_names = List.map (fun (arg : FSharpMemberOrFunctionOrValue) -> arg.FullName) arguments in
-                let refined_ty = find_refined_attribute member_or_func.Attributes in
-                let refined_ty = Option.map attribute_to_ty refined_ty in
+                let refined_attribute = find_refined_attribute member_or_func.Attributes in
+                let refined_ty = Option.map attribute_to_ty refined_attribute in
                 let ty =
                     match refined_ty with
                     | Some _ as ty -> ty
                     | None -> Option.map (fun ty -> extract_type ctx ty argument_names) member_or_func.FullTypeSafe
                 in
+                printfn "%A %A" ty member_or_func.FullTypeSafe
                 let e = extract_expr ctx ty e in
                 let e = List.foldBack (fun arg -> fun e -> Abs (arg, e)) argument_names e in
                 let ty_ctx = ctx.ty_ctx in
