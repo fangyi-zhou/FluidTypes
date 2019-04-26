@@ -176,7 +176,6 @@ module Extraction =
                     | Some _ as ty -> ty
                     | None -> Option.map (fun ty -> extract_type ctx ty argument_names) member_or_func.FullTypeSafe
                 in
-                printfn "%A %A" ty member_or_func.FullTypeSafe
                 let e = extract_expr ctx ty e in
                 let e = List.foldBack (fun arg -> fun e -> Abs (arg, e)) argument_names e in
                 let ty_ctx = ctx.ty_ctx in
