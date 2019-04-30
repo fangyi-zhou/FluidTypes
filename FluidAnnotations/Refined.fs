@@ -1,5 +1,5 @@
 namespace FluidTypes.Annotations
 
-type RefinedAttribute(refinement: string) =
+type RefinedAttribute(refinement : string) =
     inherit System.Attribute()
     member this.Refinement = refinement
