@@ -1,4 +1,5 @@
 open Microsoft.FSharp.Compiler.SourceCodeServices
+open FluidTypes.Errors
 open FluidTypes.Extraction
 open Microsoft.FSharp.Core
 open System.IO
@@ -40,16 +41,12 @@ let process_input (filename : string) =
     let results =
         checker.ParseAndCheckProject(projectOptions) |> Async.RunSynchronously
     if Array.isEmpty results.Errors then
-        (let errors =
-             List.map Extraction.check_terms_in_decls
-                 results.AssemblyContents.ImplementationFiles
-         if List.isEmpty errors then 0
-         else
-             printfn "FluidTypes Errors %A" errors
-             1)
+        (List.iter Extraction.check_terms_in_decls
+             results.AssemblyContents.ImplementationFiles
+         report_errors())
     else
         printfn "Input contains compilation errors:"
-        printfn "%A" results.Errors
+        Seq.iter (printfn "%A") results.Errors
         1
 
 [<EntryPoint>]

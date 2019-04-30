@@ -145,10 +145,10 @@ module Extraction =
         let decl = fileContents.Declarations
 
         let rec check_term (ctx : ExtractionCtx)
-                (decl : FSharpImplementationFileDeclaration) : Error list * ExtractionCtx =
+                (decl : FSharpImplementationFileDeclaration) : ExtractionCtx =
             match decl with
             | FSharpImplementationFileDeclaration.Entity(entity, decls) ->
-                let error_opt, ty_map =
+                let ty_map =
                     if entity.IsFSharpAbbreviation then
                         let ty_abbrev =
                             extract_type ctx entity.AbbreviatedType []
@@ -161,24 +161,13 @@ module Extraction =
                         let tyctx = ctx.ty_ctx
                         if Typing.is_wf_type tyctx refined_ty
                            && Typing.is_subtype tyctx refined_ty ty_abbrev then
-                            None,
                             Map.add entity.LogicalName refined_ty ctx.ty_map
-                        else
-                            Some
-                                (TypeError
-                                     (sprintf "Invalid refinement annotation %A"
-                                          refined_attribute)), ctx.ty_map
-                    else None, ctx.ty_map
+                        else ctx.ty_map
+                    else ctx.ty_map
 
                 let ctx = { ctx with ty_map = ty_map }
-                let errors, ctx = List.mapFold check_term ctx decls
-                let errors = List.concat errors
-
-                let errors =
-                    match error_opt with
-                    | Some e -> e :: errors
-                    | None -> errors
-                errors, ctx
+                let ctx = List.fold check_term ctx decls
+                ctx
             | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(member_or_func,
                                                                           arguments,
                                                                           e) ->
@@ -206,30 +195,24 @@ module Extraction =
                     List.foldBack (fun arg e -> Abs(arg, e)) argument_names e
                 let ty_ctx = ctx.ty_ctx
 
-                let errors, ty_ctx =
+                let ty_ctx =
                     match ty with
                     | Some ty ->
                         if Typing.check_type ty_ctx e ty then
-                            [],
                             Typing.env_add_var member_or_func.FullName ty ty_ctx
-                        else
-                            [ TypeError(sprintf "Incorrect Type %A for %A" ty e) ],
-                            ty_ctx
+                        else ty_ctx
                     | None ->
                         match Typing.infer_type ty_ctx e with
                         | Some ty ->
-                            [],
                             Typing.env_add_var member_or_func.FullName ty ty_ctx
-                        | None ->
-                            [ TypeError(sprintf "Cannot infer type for %A" e) ],
-                            ty_ctx
-                errors, { ctx with ty_ctx = ty_ctx }
-            | FSharpImplementationFileDeclaration.InitAction _ -> [], ctx
+                        | None -> ty_ctx
+                { ctx with ty_ctx = ty_ctx }
+            | FSharpImplementationFileDeclaration.InitAction _ -> ctx
 
         let check_term' ctx decl =
             try
                 check_term ctx decl
-            with UnExtractable error -> [ error ], ctx
+            with UnExtractable error -> ctx
 
-        let errors, _ctx = List.mapFold check_term' default_ctx decl
-        List.concat errors
+        let _ctx = List.fold check_term' default_ctx decl
+        ()
