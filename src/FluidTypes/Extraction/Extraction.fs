@@ -13,9 +13,13 @@ module Extraction =
 
     type TyMap = Map<string, Ty>
 
+    type RecordDef = Map<string, Ty>
+    type RecordDefMap = Map<string, RecordDef>
+
     type ExtractionCtx =
         { ty_ctx : TyCtx
-          ty_map : TyMap }
+          ty_map : TyMap
+          record_map : RecordDefMap }
 
     let default_ty_map : TyMap =
         Map.ofList [ "int", mk_basetype TInt
@@ -23,7 +27,8 @@ module Extraction =
 
     let default_ctx : ExtractionCtx =
         { ty_ctx = Typing.empty_ctx
-          ty_map = default_ty_map }
+          ty_map = default_ty_map
+          record_map = Map.empty }
 
     let counter = ref 0
 
@@ -141,6 +146,28 @@ module Extraction =
             printfn "Unknown expression %s" e
             UnknownTerm(e, ty)
 
+    let add_typedef (ctx : ExtractionCtx) (entity : FSharpEntity) =
+        let ty_abbrev =
+            extract_type ctx entity.AbbreviatedType []
+        let refined_attribute =
+            find_refined_attribute entity.Attributes
+        let refined_ty =
+            Option.map attribute_to_ty refined_attribute
+        let refined_ty =
+            Option.defaultValue ty_abbrev refined_ty
+        let tyctx = ctx.ty_ctx
+        let ty_map =
+            if Typing.is_wf_type tyctx refined_ty
+                && Typing.is_subtype tyctx refined_ty ty_abbrev then
+                  Map.add entity.LogicalName refined_ty ctx.ty_map
+            else ctx.ty_map
+        { ctx with ty_map = ty_map }
+
+    let add_record (ctx : ExtractionCtx) (entity: FSharpEntity) =
+        printfn "adding %A" entity.FullName
+        printfn "Fields: %A" entity.FSharpFields
+        ctx
+
     let check_terms_in_decls (fileContents : FSharpImplementationFileContents) =
         let decl = fileContents.Declarations
 
@@ -148,24 +175,11 @@ module Extraction =
                 (decl : FSharpImplementationFileDeclaration) : ExtractionCtx =
             match decl with
             | FSharpImplementationFileDeclaration.Entity(entity, decls) ->
-                let ty_map =
-                    if entity.IsFSharpAbbreviation then
-                        let ty_abbrev =
-                            extract_type ctx entity.AbbreviatedType []
-                        let refined_attribute =
-                            find_refined_attribute entity.Attributes
-                        let refined_ty =
-                            Option.map attribute_to_ty refined_attribute
-                        let refined_ty =
-                            Option.defaultValue ty_abbrev refined_ty
-                        let tyctx = ctx.ty_ctx
-                        if Typing.is_wf_type tyctx refined_ty
-                           && Typing.is_subtype tyctx refined_ty ty_abbrev then
-                            Map.add entity.LogicalName refined_ty ctx.ty_map
-                        else ctx.ty_map
-                    else ctx.ty_map
+                let ctx =
+                    if entity.IsFSharpAbbreviation then add_typedef ctx entity
+                    else if entity.IsFSharpRecord then add_record ctx entity
+                    else ctx
 
-                let ctx = { ctx with ty_map = ty_map }
                 let ctx = List.fold check_term ctx decls
                 ctx
             | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(member_or_func,
