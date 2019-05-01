@@ -45,6 +45,7 @@
     <Compile Include="Abs.fs" />
     <Compile Include="Unextractable.fs" />
     <Compile Include="Nat.fs" />
+    <Compile Include="Records.fs" />
   </ItemGroup>
   <Import Project="$(FSharpTargetsPath)" />
   <Choose>
