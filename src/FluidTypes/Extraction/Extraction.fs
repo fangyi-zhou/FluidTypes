@@ -169,6 +169,11 @@ module Extraction =
                 let ctx = List.fold check_term ctx decls
                 ctx
             | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(member_or_func,
+                                                                          _,
+                                                                          _) when member_or_func.IsCompilerGenerated ->
+                (* Skip all the generated declarations *)
+                ctx
+            | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(member_or_func,
                                                                           arguments,
                                                                           e) ->
                 let arguments =
