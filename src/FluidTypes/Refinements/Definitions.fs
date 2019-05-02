@@ -21,6 +21,7 @@ module Definitions =
         | FuncType of Variable * Ty * (* of argument *) Ty
         (* of result *)
         | UnknownType of string
+        | RecordType of string
 
     and BaseTy =
         | TBool
@@ -50,9 +51,14 @@ module Definitions =
         | Not
         | Negate
 
+    type RecordDef = Map<string, Ty>
+
+    type RecordDefMap = Map<string, RecordDef>
+
     type TyCtx =
         { varCtx : Map<Variable, Ty>
-          predicateCtx : List<Term> }
+          predicateCtx : List<Term>
+          recordDef : RecordDefMap }
 
     let special_this : Variable = "$this"
 

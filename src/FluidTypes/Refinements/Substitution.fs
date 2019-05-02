@@ -39,6 +39,7 @@ module Substitution =
                 sub (alpha_conv_ty v (find_replacement_var v free_vars) ty)
             else FuncType(v, sub t_arg, sub t_result)
         | UnknownType _ -> ty
+        | RecordType _ -> ty
 
     and alpha_conv_term (v_from : Variable) (v_to : Variable) (term : Term) : Term =
         (* Replace all bound `v_from` to `v_to` *)
@@ -67,3 +68,4 @@ module Substitution =
             let conv ty = alpha_conv_ty v_from v_to ty
             FuncType(v, conv t_arg, conv t_result)
         | UnknownType _ -> ty
+        | RecordType _ -> ty

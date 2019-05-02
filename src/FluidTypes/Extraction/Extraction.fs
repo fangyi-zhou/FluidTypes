@@ -13,13 +13,9 @@ module Extraction =
 
     type TyMap = Map<string, Ty>
 
-    type RecordDef = Map<string, Ty>
-    type RecordDefMap = Map<string, RecordDef>
-
     type ExtractionCtx =
         { ty_ctx : TyCtx
-          ty_map : TyMap
-          record_map : RecordDefMap }
+          ty_map : TyMap }
 
     let default_ty_map : TyMap =
         Map.ofList [ "int", mk_basetype TInt
@@ -27,8 +23,7 @@ module Extraction =
 
     let default_ctx : ExtractionCtx =
         { ty_ctx = Typing.empty_ctx
-          ty_map = default_ty_map
-          record_map = Map.empty }
+          ty_map = default_ty_map }
 
     let counter = ref 0
 
@@ -163,10 +158,33 @@ module Extraction =
             else ctx.ty_map
         { ctx with ty_map = ty_map }
 
+    let extract_field (ctx : ExtractionCtx) (field : FSharpField) : ExtractionCtx =
+        let name = field.Name
+        let refined_attribute = find_refined_attribute field.PropertyAttributes
+        let refined_ty = Option.map attribute_to_ty refined_attribute
+        let raw_ty = extract_type ctx field.FieldType []
+        let refined_ty = Option.defaultValue raw_ty refined_ty
+        let tyctx = ctx.ty_ctx
+        if Typing.is_wf_type tyctx refined_ty then
+            if Typing.is_subtype tyctx refined_ty raw_ty then
+                let tyctx = Typing.env_add_var name refined_ty tyctx
+                { ctx with ty_ctx = tyctx }
+            else
+                failwithf "Invalid refinement type %A for %s due to subtyping" refined_ty name (* TODO *)
+        else
+            failwithf "Invalid refinement type %A for %s due to wf" refined_ty name (* TODO *)
+
+
     let add_record (ctx : ExtractionCtx) (entity: FSharpEntity) =
-        printfn "adding %A" entity.FullName
-        printfn "Fields: %A" entity.FSharpFields
-        ctx
+        let name = entity.FullName
+        let fields = List.ofSeq entity.FSharpFields
+        let old_ctx = ctx
+        (* Clear var ctx, fill with fields in records *)
+        let ctx = { ctx with ty_ctx = { ctx.ty_ctx with varCtx = Map.empty } }
+        let ctx = List.fold extract_field ctx fields
+        let recordDef = ctx.ty_ctx.varCtx
+        let ty_ctx = Typing.env_add_record name recordDef old_ctx.ty_ctx
+        { old_ctx with ty_ctx = ty_ctx ; ty_map = Map.add name (RecordType name) old_ctx.ty_map }
 
     let check_terms_in_decls (fileContents : FSharpImplementationFileContents) =
         let decl = fileContents.Declarations
@@ -179,7 +197,6 @@ module Extraction =
                     if entity.IsFSharpAbbreviation then add_typedef ctx entity
                     else if entity.IsFSharpRecord then add_record ctx entity
                     else ctx
-
                 let ctx = List.fold check_term ctx decls
                 ctx
             | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(member_or_func,

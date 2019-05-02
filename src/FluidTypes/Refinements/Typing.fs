@@ -5,13 +5,16 @@ module Typing =
 
     let empty_ctx : TyCtx =
         { varCtx = Map.empty
-          predicateCtx = [] }
+          predicateCtx = []
+          recordDef = Map.empty }
 
     let env_add_var (v : Variable) (ty : Ty) (ty_ctx : TyCtx) : TyCtx =
         { (* TODO: Renaming *)
           ty_ctx with varCtx = Map.add v ty ty_ctx.varCtx }
     let env_add_predicate (predicate : Term) (ty_ctx : TyCtx) : TyCtx =
         { ty_ctx with predicateCtx = predicate :: ty_ctx.predicateCtx }
+    let env_add_record (name : Variable) (def : RecordDef) (ty_ctx : TyCtx) : TyCtx =
+        { ty_ctx with recordDef = Map.add name def ty_ctx.recordDef }
 
     let type_const (c : Constant) : Ty =
         match c with
@@ -107,7 +110,8 @@ module Typing =
                      (let ctx_ = env_add_var v t_arg ctx
                       is_wf_type ctx_ t_result)
                  else false
-             | UnknownType _ -> true)
+             | UnknownType _ -> true
+             | RecordType _ -> true)
         else
             (let undef_vars = Set.toList undef_vars
              err_not_closed_type (ty.ToString()) undef_vars

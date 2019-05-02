@@ -22,3 +22,4 @@ module FreeVar =
         | FuncType(v, t_arg, t_result) ->
             Set.union (free_var_ty t_arg) (Set.remove v (free_var_ty t_result))
         | UnknownType _ -> Set.empty
+        | RecordType _ -> Set.empty

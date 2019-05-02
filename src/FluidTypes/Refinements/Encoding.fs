@@ -24,6 +24,7 @@ module Encoding =
             { env with consts = Map.add x b env.consts }
         | FuncType _ -> env
         | UnknownType _ -> env
+        | RecordType _ -> failwith "Unimplemented" (* TODO *)
 
     let encode_ctx (env : EncodingEnv) (ctx : TyCtx) : EncodingEnv =
         let var_ctx = ctx.varCtx
