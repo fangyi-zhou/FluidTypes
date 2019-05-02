@@ -96,7 +96,7 @@ module Typing =
         let var_ctx = ctx.varCtx
         (* Check FV(ty) is a subset of dom(Gamma) *)
         let undef_vars =
-            Set.filter (fun fv -> Map.containsKey fv var_ctx) free_vars
+            Set.filter (fun fv -> not (Map.containsKey fv var_ctx)) free_vars
         if Set.isEmpty undef_vars then
             (match ty with
              | BaseType(b, term) ->
