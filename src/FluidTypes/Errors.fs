@@ -42,10 +42,10 @@ module Errors =
         | TypeError e -> show_type_error e
 
     let all_errors : Error list ref = ref []
-    let has_errors = not (List.isEmpty !all_errors)
+    let has_errors () = not (List.isEmpty !all_errors)
 
     let report_errors() : int =
-        if not has_errors then 0
+        if not (has_errors ()) then 0
         else
             (let errors = List.map show_error !all_errors
              List.iter (printfn "%s") errors
