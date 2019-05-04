@@ -155,8 +155,8 @@ module Solver =
                 let sexp_then = term_to_sexp term_then
                 let sexp_else = term_to_sexp term_else
                 sprintf "(ite %s %s %s)" sexp_cond sexp_then sexp_else
-            | FieldGet(term_, field) ->
-                failwith "Unimplemented"
+            | FieldGet(Var v, field) ->
+                sprintf "%s#%s" v field
             | _ -> raise UnEncodable
 
         let encode_term term =

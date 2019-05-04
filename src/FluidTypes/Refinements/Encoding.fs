@@ -12,23 +12,29 @@ module Encoding =
           functions = Map.empty
           clauses = Set.empty }
 
-    let encode_term (env : EncodingEnv) (term : Term) : EncodingEnv =
+    let encode_term (env : EncodingEnv) (ctx : TyCtx) (term : Term) : EncodingEnv =
         { env with clauses = Set.add term env.clauses }
 
-    let encode_ctx_var (env : EncodingEnv) (x : Variable) (ty : Ty) : EncodingEnv =
+    let rec encode_ctx_var (env : EncodingEnv) (ctx : TyCtx) (x : Variable) (ty : Ty) : EncodingEnv =
         match ty with
         | BaseType(b, term) ->
             let env =
-                encode_term env
+                encode_term env ctx
                     (Substitution.substitute_term term x (Var special_this))
             { env with consts = Map.add x b env.consts }
         | FuncType _ -> env
         | UnknownType _ -> env
-        | RecordType _ -> failwith "Unimplemented" (* TODO *)
+        | RecordType r ->
+            match Map.tryFind r ctx.recordDef with
+            | Some defs ->
+                let encode_flatten env (name, ty) =
+                    encode_ctx_var env ctx (sprintf "%s#%s" x name) ty
+                List.fold encode_flatten env defs
+            | None -> failwithf "Internal error: Missing record definition for %s" r
 
     let encode_ctx (env : EncodingEnv) (ctx : TyCtx) : EncodingEnv =
         let var_ctx = ctx.varCtx
-        let env = Map.fold encode_ctx_var env var_ctx
+        let env = Map.fold (fun e -> encode_ctx_var e ctx) env var_ctx
         { env with clauses =
                        List.fold (fun cls p -> Set.add p cls) env.clauses
                            ctx.predicateCtx }
@@ -39,6 +45,6 @@ module Encoding =
         let env =
             { env with consts = Map.add special_this base_type env.consts }
         let env = encode_ctx env ctx
-        let env = encode_term env term_1
-        let env = encode_term env (mk_not term_2)
+        let env = encode_term env ctx term_1
+        let env = encode_term env ctx (mk_not term_2)
         Solver.solve_encoding env
