@@ -7,6 +7,8 @@ module Errors =
         | NotInferrable of string
         | NotClosedType of string * string list
         | NotASubType of string * string * string
+        | FieldNotFound of string * string
+        | NotARecord of string
 
     (* TODO *)
     type ExtractionError = string
@@ -27,6 +29,10 @@ module Errors =
                 vars
         | NotASubType(term, ty_1, ty_2) ->
             sprintf "%s is not a subtype of %s for term %s" ty_1 ty_2 term
+        | FieldNotFound(record_ty, field_name) ->
+            sprintf "%s is not a field name for record %s" field_name record_ty
+        | NotARecord(term) ->
+            sprintf "%s is not a record, cannot use field get." term
 
     let show_extraction_error (error : ExtractionError) = error
 
@@ -53,3 +59,6 @@ module Errors =
     let err_not_closed_type ty vars = add_type_error (NotClosedType(ty, vars))
     let err_not_a_subtype term ty_1 ty_2 =
         add_type_error (NotASubType(term, ty_1, ty_2))
+    let err_field_not_found record field =
+        add_type_error (FieldNotFound (record, field))
+    let err_not_a_record term = add_type_error (NotARecord term)

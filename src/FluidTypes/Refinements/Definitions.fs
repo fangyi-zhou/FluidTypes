@@ -15,6 +15,7 @@ module Definitions =
         | Anno of Term * Ty
         | Coerce of Term * Ty
         | UnknownTerm of string * Ty
+        | FieldGet of Term * string
 
     and Ty =
         | BaseType of BaseTy * Term

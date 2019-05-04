@@ -14,6 +14,7 @@ module FreeVar =
                             free_var_term term_else ]
         | Anno(term_, ty)
         | Coerce(term_, ty) -> Set.union (free_var_term term_) (free_var_ty ty)
+        | FieldGet(term_, _) -> free_var_term term_
         | UnknownTerm _ -> Set.empty
 
     and free_var_ty (ty : Ty) : Set<Variable> =

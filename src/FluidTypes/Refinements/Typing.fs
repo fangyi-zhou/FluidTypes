@@ -15,6 +15,8 @@ module Typing =
         { ty_ctx with predicateCtx = predicate :: ty_ctx.predicateCtx }
     let env_add_record (name : Variable) (def : RecordDef) (ty_ctx : TyCtx) : TyCtx =
         { ty_ctx with recordDef = Map.add name def ty_ctx.recordDef }
+    let env_lookup_record (name : Variable) (ty_ctx : TyCtx) : RecordDef option =
+        Map.tryFind name ty_ctx.recordDef
 
     let type_const (c : Constant) : Ty =
         match c with
@@ -58,6 +60,23 @@ module Typing =
             if base_type_typecheck && coercion_type_wf then Some ty
             else None
         | UnknownTerm(_, ty) -> Some ty
+        | FieldGet(term_, field) ->
+            match infer_type ctx term_ with
+            | Some(RecordType(r)) ->
+                match env_lookup_record r ctx with
+                | Some def ->
+                    match Map.tryFind field def with
+                    | Some(BaseType(base_ty, _)) -> Some(BaseType(base_ty, mk_binop_app EqualInt (Var special_this) term))
+                    | Some ty -> Some ty
+                    | None ->
+                        err_field_not_found r field
+                        None
+                | None -> failwithf "Internal error: Missing record definition for %s" r
+            | Some _ ->
+                err_not_a_record (term_.ToString())
+                None
+            | None ->
+                None
         | _ ->
             err_not_inferrable (term.ToString())
             None

@@ -136,6 +136,9 @@ module Extraction =
                 printfn "Unknown const %s" const_value
                 UnknownTerm(const_value, extract_type ctx const_type [])
         | BasicPatterns.Value(value_to_get) -> Var value_to_get.FullName
+        | BasicPatterns.FSharpFieldGet(Some(expr), _ty, field) ->
+            let expr = extract_expr ctx None expr
+            FieldGet(expr, field.Name)
         | otherwise ->
             let e = e.ToString()
             printfn "Unknown expression %s" e
