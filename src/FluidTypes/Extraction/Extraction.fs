@@ -139,6 +139,14 @@ module Extraction =
         | BasicPatterns.FSharpFieldGet(Some(expr), _ty, field) ->
             let expr = extract_expr ctx None expr
             FieldGet(expr, field.Name)
+        | BasicPatterns.NewRecord(ty_, fields) ->
+            let ty_ = extract_type ctx ty_ []
+            let record_name =
+                match ty_ with
+                | RecordType r -> r
+                | _ -> failwithf "Internal Error: %A is not a record type" ty_
+            let exprs = List.map (extract_expr ctx None) fields
+            NewRecord(exprs, record_name)
         | otherwise ->
             let e = e.ToString()
             printfn "Unknown expression %s" e
@@ -161,7 +169,7 @@ module Extraction =
             else ctx.ty_map
         { ctx with ty_map = ty_map }
 
-    let extract_field (ctx : ExtractionCtx) (field : FSharpField) : ExtractionCtx =
+    let extract_field (ctx : ExtractionCtx, def : RecordDef) (field : FSharpField) : ExtractionCtx * RecordDef =
         let name = field.Name
         let refined_attribute = find_refined_attribute field.PropertyAttributes
         let refined_ty = Option.map attribute_to_ty refined_attribute
@@ -171,7 +179,7 @@ module Extraction =
         if Typing.is_wf_type tyctx refined_ty then
             if Typing.is_subtype tyctx refined_ty raw_ty then
                 let tyctx = Typing.env_add_var name refined_ty tyctx
-                { ctx with ty_ctx = tyctx }
+                { ctx with ty_ctx = tyctx }, ((name, refined_ty) :: def)
             else
                 failwithf "Invalid refinement type %A for %s due to subtyping" refined_ty name (* TODO *)
         else
@@ -184,8 +192,8 @@ module Extraction =
         let old_ctx = ctx
         (* Clear var ctx, fill with fields in records *)
         let ctx = { ctx with ty_ctx = { ctx.ty_ctx with varCtx = Map.empty } }
-        let ctx = List.fold extract_field ctx fields
-        let recordDef = ctx.ty_ctx.varCtx
+        let ctx, def = List.fold extract_field (ctx, []) fields
+        let recordDef = List.rev def
         let ty_ctx = Typing.env_add_record name recordDef old_ctx.ty_ctx
         { old_ctx with ty_ctx = ty_ctx ; ty_map = Map.add name (RecordType name) old_ctx.ty_map }
 

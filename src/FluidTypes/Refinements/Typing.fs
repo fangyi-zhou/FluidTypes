@@ -65,9 +65,9 @@ module Typing =
             | Some(RecordType(r)) ->
                 match env_lookup_record r ctx with
                 | Some def ->
-                    match Map.tryFind field def with
-                    | Some(BaseType(base_ty, _)) -> Some(BaseType(base_ty, mk_binop_app EqualInt (Var special_this) term))
-                    | Some ty -> Some ty
+                    match List.tryFind (fun f -> fst f = field) def with
+                    | Some(_, BaseType(base_ty, _)) -> Some(BaseType(base_ty, mk_binop_app EqualInt (Var special_this) term))
+                    | Some(_, ty) -> Some ty
                     | None ->
                         err_field_not_found r field
                         None
@@ -77,9 +77,27 @@ module Typing =
                 None
             | None ->
                 None
+        | NewRecord(terms, record) ->
+            if is_wf_record ctx terms record then
+                Some (RecordType record)
+            else
+                None
         | _ ->
             err_not_inferrable (term.ToString())
             None
+
+    and is_wf_record ctx terms record =
+        match env_lookup_record record ctx with
+        | Some def ->
+            let def_pairs = List.zip def terms
+            let check_field ctx ((name, ty), term) =
+                let checks = check_type ctx term ty
+                let ctx = env_add_var name ty ctx
+                let ctx = env_add_predicate (mk_binop_app EqualInt (Var name) term) ctx
+                checks, env_add_var name ty ctx
+            let checks, _ = List.mapFold check_field ctx def_pairs
+            List.forall (fun x -> x) checks
+        | None -> failwithf "Internal error: Missing record definition for %s" record
 
     and check_type (ctx : TyCtx) (term : Term) (ty : Ty) : bool =
         if is_wf_type ctx ty then
@@ -198,4 +216,5 @@ module Typing =
         | FuncType(v_1, t_arg_1, t_result_1), FuncType(v_2, t_arg_2, t_result_2) ->
             is_subtype ctx ty_1 (Substitution.alpha_conv_ty v_2 v_1 t_result_2)
         | UnknownType ty_1, UnknownType ty_2 -> ty_1 = ty_2
+        | RecordType r_1, RecordType r_2 -> r_1 = r_2
         | _ -> false

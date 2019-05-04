@@ -15,6 +15,7 @@ module Definitions =
         | Anno of Term * Ty
         | Coerce of Term * Ty
         | UnknownTerm of string * Ty
+        | NewRecord of Term list * string
         | FieldGet of Term * string
 
     and Ty =
@@ -52,7 +53,7 @@ module Definitions =
         | Not
         | Negate
 
-    type RecordDef = Map<string, Ty>
+    type RecordDef = (string * Ty) list
 
     type RecordDefMap = Map<string, RecordDef>
 

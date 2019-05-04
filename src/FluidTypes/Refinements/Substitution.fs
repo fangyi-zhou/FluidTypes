@@ -27,6 +27,7 @@ module Substitution =
         | Coerce(term_, ty) -> Coerce(sub term_, substitute_ty ty x replace)
         | UnknownTerm _ -> term
         | FieldGet(term, field) -> FieldGet(sub term, field)
+        | NewRecord(terms, record) -> NewRecord(List.map sub terms, record)
 
     and substitute_ty (ty : Ty) (x : Variable) (replace : Term) : Ty =
         match ty with
@@ -56,6 +57,7 @@ module Substitution =
         | Anno(term_, ty) -> Anno(conv term, alpha_conv_ty v_from v_to ty)
         | Coerce(term_, ty) -> Coerce(conv term, alpha_conv_ty v_from v_to ty)
         | FieldGet(term, field) -> FieldGet(conv term, field)
+        | NewRecord(terms, record) -> NewRecord(List.map conv terms, record)
         | _ -> term
 
     and alpha_conv_ty (v_from : Variable) (v_to : Variable) (ty : Ty) : Ty =
