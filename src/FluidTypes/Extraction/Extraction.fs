@@ -3,8 +3,8 @@ namespace FluidTypes.Extraction
 open System.Reflection.Metadata
 
 module Extraction =
-    open Microsoft.FSharp.Compiler.AbstractIL.Internal.Library
-    open Microsoft.FSharp.Compiler.SourceCodeServices
+    open FSharp.Compiler.AbstractIL.Internal.Library
+    open FSharp.Compiler.SourceCodeServices
     open FluidTypes.Refinements
     open FluidTypes.Annotations.AnnotationParser
     open FluidTypes.Errors

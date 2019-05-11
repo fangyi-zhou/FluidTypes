@@ -1,4 +1,6 @@
-open Microsoft.FSharp.Compiler.SourceCodeServices
+open FSharp.Compiler.SourceCodeServices
+open Dotnet.ProjInfo.Workspace
+open Dotnet.ProjInfo.Workspace.FCS
 open FluidTypes.Errors
 open FluidTypes.Extraction
 open Microsoft.FSharp.Core
@@ -25,6 +27,15 @@ let handle_args (results : ParseResults<CliArguments>) =
         FluidTypes.Refinements.Solver.set_log_queries true
     results.GetResult Input
 
+let get_project_options filename checker =
+    let msbuild_locator = MSBuildLocator ()
+    let loader_config = LoaderConfig.Default (msbuild_locator)
+    let loader = Loader.Create(loader_config)
+    let netfw_info_config = NetFWInfoConfig.Default (msbuild_locator)
+    let netfw_info = NetFWInfo.Create (netfw_info_config)
+    let fcs_binder = FCSBinder (netfw_info, loader, checker)
+    fcs_binder.GetProjectOptions (filename)
+
 let process_input (filename : string) =
     let checker = FSharpChecker.Create(keepAssemblyContents = true)
 
@@ -35,7 +46,9 @@ let process_input (filename : string) =
             |> Async.RunSynchronously
         | ".fs" -> failwith "Unimplemented"
         | ".fsproj" ->
-            ProjectCracker.GetProjectOptionsFromProjectFile(filename), []
+            match get_project_options filename checker with
+            | Some options -> options, []
+            | None -> failwith "Unable to load project options"
         | ext -> failwithf "Unsupported File Extension %s" ext
 
     let results =

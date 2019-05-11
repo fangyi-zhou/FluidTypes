@@ -2,6 +2,7 @@ framework: auto-detect
 
 source https://nuget.org/api/v2
 
+nuget Dotnet.ProjInfo.Workspace.FCS
 nuget FSharp.Compiler.Service
 nuget FSharp.Compiler.Service.ProjectCracker
 nuget FSharp.Core

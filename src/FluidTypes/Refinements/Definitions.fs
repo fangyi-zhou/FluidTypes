@@ -1,7 +1,5 @@
 namespace FluidTypes.Refinements
 
-open Microsoft.FSharp.Compiler.SourceCodeServices
-
 [<AutoOpen>]
 module Definitions =
     type Variable = string
