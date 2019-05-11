@@ -31,6 +31,8 @@ let get_project_options filename checker =
     let msbuild_locator = MSBuildLocator ()
     let loader_config = LoaderConfig.Default (msbuild_locator)
     let loader = Loader.Create(loader_config)
+    let filename = Path.GetFullPath(filename)
+    loader.LoadProjects [filename]
     let netfw_info_config = NetFWInfoConfig.Default (msbuild_locator)
     let netfw_info = NetFWInfo.Create (netfw_info_config)
     let fcs_binder = FCSBinder (netfw_info, loader, checker)
