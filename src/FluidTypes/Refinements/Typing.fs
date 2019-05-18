@@ -17,6 +17,11 @@ module Typing =
         { ty_ctx with recordDef = Map.add name def ty_ctx.recordDef }
     let env_lookup_record (name : Variable) (ty_ctx : TyCtx) : RecordDef option =
         Map.tryFind name ty_ctx.recordDef
+    let env_resolve_unknown_ty (name : string) (typedef : Ty) (ty_ctx : TyCtx) : TyCtx =
+        { varCtx = Map.map (fun _ -> Substitution.resolve_unknown_ty_in_ty name typedef) ty_ctx.varCtx
+          predicateCtx = List.map (Substitution.resolve_unknown_ty_in_term name typedef) ty_ctx.predicateCtx
+          recordDef = Map.map (fun _ -> List.map (fun (f, ty) -> f, Substitution.resolve_unknown_ty_in_ty name typedef ty)) ty_ctx.recordDef
+        }
 
     let type_const (c : Constant) : Ty =
         match c with

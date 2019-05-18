@@ -79,3 +79,30 @@ module Substitution =
         | UnknownType _ -> ty
         | RecordType _ -> ty
         | ProductType tys -> ProductType(List.map conv tys)
+
+    and resolve_unknown_ty_in_ty (name : string) (typedef : Ty) (ty_to_resolve : Ty) : Ty =
+        let resolve = resolve_unknown_ty_in_ty name typedef
+        match ty_to_resolve with
+        | BaseType(basety, term) ->
+            BaseType(basety, resolve_unknown_ty_in_term name typedef term)
+        | FuncType(v, t_arg, t_result) ->
+            FuncType(v, resolve t_arg, resolve t_result)
+        | UnknownType name_ when name = name_ -> typedef
+        | UnknownType name_ -> UnknownType name_
+        | RecordType r -> RecordType r
+        | ProductType tys -> ProductType (List.map resolve tys)
+
+    and resolve_unknown_ty_in_term (name : string) (typedef : Ty) (term_to_resolve : Term) : Term =
+        let resolve = resolve_unknown_ty_in_term name typedef
+        match term_to_resolve with
+        | Var x -> Var x
+        | Const c -> Const c
+        | App (t1, t2) -> App (resolve t1, resolve t2)
+        | Abs (v, t) -> Abs (v, resolve t)
+        | IfThenElse (t1, t2, t3) -> IfThenElse (resolve t1, resolve t2, resolve t3)
+        | Anno (t, ty) -> Anno (resolve t, resolve_unknown_ty_in_ty name typedef ty)
+        | Coerce (t, ty) -> Coerce (resolve t, resolve_unknown_ty_in_ty name typedef ty)
+        | UnknownTerm (s, ty) -> UnknownTerm (s, resolve_unknown_ty_in_ty name typedef ty)
+        | NewRecord (terms, s) -> NewRecord (List.map resolve terms, s)
+        | FieldGet (term, f) -> FieldGet (resolve term, f)
+        | Tuple terms -> Tuple(List.map resolve terms)

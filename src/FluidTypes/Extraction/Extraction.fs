@@ -15,6 +15,8 @@ module Extraction =
         { ty_ctx : TyCtx
           ty_map : TyMap }
 
+    let unresolved_tys : Set<string> ref = ref Set.empty
+
     let default_ty_map : TyMap =
         Map.ofList [ "int", mk_basetype TInt
                      "bool", mk_basetype TBool
@@ -30,6 +32,13 @@ module Extraction =
         let name = sprintf "_%d" !counter
         counter := !counter + 1
         name
+
+    let resolve_unknown_ty (name: string) (typedef : Ty) (ctx: ExtractionCtx) : ExtractionCtx =
+        if Set.contains name !unresolved_tys
+        then printfn "Resolved Type: %s" name
+        { ty_ctx = Typing.env_resolve_unknown_ty name typedef ctx.ty_ctx
+          ty_map = Map.map (fun _ -> Substitution.resolve_unknown_ty_in_ty name typedef) ctx.ty_map
+        }
 
     let is_refined_attribute (attribute : FSharpAttribute) =
         let ty = attribute.AttributeType
@@ -74,6 +83,7 @@ module Extraction =
             | None ->
                 let typeName = name
                 printfn "Unknown Type: %s" typeName
+                unresolved_tys := Set.add typeName !unresolved_tys
                 UnknownType typeName
         | _ ->
             let typeName = ty.ToString()
@@ -167,12 +177,16 @@ module Extraction =
         let refined_ty =
             Option.defaultValue ty_abbrev refined_ty
         let tyctx = ctx.ty_ctx
-        let ty_map =
-            if Typing.is_wf_type tyctx refined_ty
-                && Typing.is_subtype tyctx refined_ty ty_abbrev then
-                  Map.add entity.LogicalName refined_ty ctx.ty_map
-            else ctx.ty_map
-        { ctx with ty_map = ty_map }
+        let is_valid_typedef =
+            Typing.is_wf_type tyctx refined_ty
+                && Typing.is_subtype tyctx refined_ty ty_abbrev
+        let ctx =
+            if is_valid_typedef
+            then
+                let ctx = { ctx with ty_map = Map.add entity.LogicalName refined_ty ctx.ty_map }
+                resolve_unknown_ty entity.LogicalName refined_ty ctx
+            else ctx
+        ctx
 
     let extract_field (ctx : ExtractionCtx, def : RecordDef) (field : FSharpField) : ExtractionCtx * RecordDef =
         let name = field.Name
@@ -200,7 +214,8 @@ module Extraction =
         let ctx, def = List.fold extract_field (ctx, []) fields
         let recordDef = List.rev def
         let ty_ctx = Typing.env_add_record name recordDef old_ctx.ty_ctx
-        { old_ctx with ty_ctx = ty_ctx ; ty_map = Map.add name (RecordType name) old_ctx.ty_map }
+        let ctx = { old_ctx with ty_ctx = ty_ctx ; ty_map = Map.add name (RecordType name) old_ctx.ty_map }
+        resolve_unknown_ty name (RecordType name) ctx
 
     let rec check_decl (ctx : ExtractionCtx)
             (decl : FSharpImplementationFileDeclaration) : ExtractionCtx =
