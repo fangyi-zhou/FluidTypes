@@ -28,7 +28,7 @@ module Encoding =
             match Map.tryFind r ctx.recordDef with
             | Some defs ->
                 let encode_flatten env (name, ty) =
-                    encode_ctx_var env ctx (sprintf "%s#%s" x name) ty
+                    encode_ctx_var env ctx (sprintf "%s$%s" x name) ty
                 List.fold encode_flatten env defs
             | None -> failwithf "Internal error: Missing record definition for %s" r
         | ProductType tys -> failwith "TODO"
