@@ -47,6 +47,7 @@
     <Compile Include="Nat.fs" />
     <Compile Include="Records.fs" />
     <Compile Include="Tuple.fs" />
+    <Compile Include="Unit.fs" />
   </ItemGroup>
   <Import Project="$(FSharpTargetsPath)" />
   <Choose>

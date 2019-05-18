@@ -1,0 +1,3 @@
+module Unit
+
+let u = ()

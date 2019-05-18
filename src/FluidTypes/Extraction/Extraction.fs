@@ -143,6 +143,7 @@ module Extraction =
             match const_value_obj with
             | :? int -> Const(IntLiteral(const_value_obj :?> int))
             | :? bool -> Const(BoolLiteral(const_value_obj :?> bool))
+            | null -> Tuple [] (* Unit *)
             | otherwise ->
                 let const_value = const_value_obj.ToString()
                 printfn "Unknown const %s" const_value
