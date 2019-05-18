@@ -15,6 +15,13 @@ module Encoding =
     let encode_term (env : EncodingEnv) (ctx : TyCtx) (term : Term) : EncodingEnv =
         { env with clauses = Set.add term env.clauses }
 
+    let bind_record_ty (r : RecordDef) (x : Variable) (ty : Ty) : Ty =
+        let fields_to_bind = List.map fst r
+        let bind_field ty field =
+            let bound_field = Var (sprintf "%s$%s" x field)
+            Substitution.substitute_ty ty field bound_field
+        List.fold bind_field ty fields_to_bind
+
     let rec encode_ctx_var (env : EncodingEnv) (ctx : TyCtx) (x : Variable) (ty : Ty) : EncodingEnv =
         match ty with
         | BaseType(b, term) ->
@@ -28,7 +35,7 @@ module Encoding =
             match Map.tryFind r ctx.recordDef with
             | Some defs ->
                 let encode_flatten env (name, ty) =
-                    encode_ctx_var env ctx (sprintf "%s$%s" x name) ty
+                    encode_ctx_var env ctx (sprintf "%s$%s" x name) (bind_record_ty defs x ty)
                 List.fold encode_flatten env defs
             | None -> failwithf "Internal error: Missing record definition for %s" r
         | ProductType tys -> failwith "TODO"
