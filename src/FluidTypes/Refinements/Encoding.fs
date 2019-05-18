@@ -31,6 +31,7 @@ module Encoding =
                     encode_ctx_var env ctx (sprintf "%s#%s" x name) ty
                 List.fold encode_flatten env defs
             | None -> failwithf "Internal error: Missing record definition for %s" r
+        | ProductType tys -> failwith "TODO"
 
     let encode_ctx (env : EncodingEnv) (ctx : TyCtx) : EncodingEnv =
         let var_ctx = ctx.varCtx

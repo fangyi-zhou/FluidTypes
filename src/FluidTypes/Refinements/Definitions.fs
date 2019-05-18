@@ -15,6 +15,7 @@ module Definitions =
         | UnknownTerm of string * Ty
         | NewRecord of Term list * string
         | FieldGet of Term * string
+        | Tuple of Term list
 
     and Ty =
         | BaseType of BaseTy * Term
@@ -22,6 +23,7 @@ module Definitions =
         (* of result *)
         | UnknownType of string
         | RecordType of string
+        | ProductType of Ty list
 
     and BaseTy =
         | TBool

@@ -18,6 +18,7 @@ module FreeVar =
         | NewRecord(terms, _) ->
             List.map free_var_term terms |> Set.unionMany
         | UnknownTerm _ -> Set.empty
+        | Tuple(terms) -> Set.unionMany (List.map free_var_term terms)
 
     and free_var_ty (ty : Ty) : Set<Variable> =
         match ty with
@@ -26,3 +27,4 @@ module FreeVar =
             Set.union (free_var_ty t_arg) (Set.remove v (free_var_ty t_result))
         | UnknownType _ -> Set.empty
         | RecordType _ -> Set.empty
+        | ProductType tys -> Set.unionMany (List.map free_var_ty tys)
