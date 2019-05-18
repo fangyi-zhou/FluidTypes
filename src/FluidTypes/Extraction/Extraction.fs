@@ -19,7 +19,8 @@ module Extraction =
 
     let default_ty_map : TyMap =
         Map.ofList [ "int", mk_basetype TInt
-                     "bool", mk_basetype TBool ]
+                     "bool", mk_basetype TBool
+                     "unit", ProductType [] ]
 
     let default_ctx : ExtractionCtx =
         { ty_ctx = Typing.empty_ctx
@@ -63,6 +64,9 @@ module Extraction =
                     FuncType(name, ty_arg, conv_func_type args names)
                 | _ -> failwith "Extracting a function type without arguments"
             conv_func_type args names
+        | _ when ty.IsTupleType ->
+            let args = ty.GenericArguments |> List.ofSeq
+            ProductType(List.map (fun ty -> extract_type ctx ty []) args)
         | _ when ty.HasTypeDefinition ->
             let ty_map = ctx.ty_map
             let name = Option.attempt (fun () -> ty.TypeDefinition.FullName)
@@ -147,6 +151,9 @@ module Extraction =
                 | _ -> failwithf "Internal Error: %A is not a record type" ty_
             let exprs = List.map (extract_expr ctx None) fields
             NewRecord(exprs, record_name)
+        | BasicPatterns.NewTuple(ty_, terms) ->
+            let terms = List.map (extract_expr ctx None) terms
+            Tuple(terms)
         | otherwise ->
             let e = e.ToString()
             printfn "Unknown expression %s" e
