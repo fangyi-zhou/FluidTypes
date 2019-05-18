@@ -11,6 +11,18 @@ module Solver =
           options : string
           log_queries : bool }
 
+    let log_writer = ref None
+
+    let get_log_file_writer () =
+        match !log_writer with
+        | None ->
+            let time = System.DateTime.Now.ToBinary()
+            let filename = sprintf "%u.log" time
+            let writer = new System.IO.StreamWriter(filename)
+            log_writer := Some writer
+            writer
+        | Some writer -> writer
+
     let find_z3() =
         let path = Environment.GetEnvironmentVariable "PATH"
         let directory = path.Split Path.PathSeparator
@@ -41,19 +53,13 @@ module Solver =
         if (!opt).path.IsNone then set_z3_path (find_z3())
         let opt = !opt
         let path = Option.get opt.path
-        let time = System.DateTime.Now.ToBinary()
 
-        let log_file_writer =
-            if opt.log_queries then
-                let filename = (sprintf "%u.log" time)
-                let writer = new System.IO.StreamWriter(filename)
-                Some writer
-            else None
+        let logger = if opt.log_queries then Some (get_log_file_writer ()) else None
 
         let log (content : string) =
             Option.iter (fun (writer : StreamWriter) ->
                 writer.Write(content)
-                writer.WriteLine()) log_file_writer
+                writer.WriteLine()) logger
 
         let tempfile = System.IO.Path.GetTempFileName()
         let writer = new System.IO.StreamWriter(tempfile)
@@ -94,8 +100,7 @@ module Solver =
         p.WaitForExit()
         log (String.concat "\n" !outputs)
         log (String.concat "\n" !errors)
-        Option.iter (fun (writer : StreamWriter) -> writer.Close())
-            log_file_writer
+        Option.iter (fun (writer : StreamWriter) -> writer.Flush()) logger
         !outputs
 
     let is_unsat (formula : string) : bool =
