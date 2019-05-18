@@ -1,7 +1,5 @@
 namespace FluidTypes.Extraction
 
-open System.Reflection.Metadata
-
 module Extraction =
     open FSharp.Compiler.AbstractIL.Internal.Library
     open FSharp.Compiler.SourceCodeServices
@@ -204,69 +202,73 @@ module Extraction =
         let ty_ctx = Typing.env_add_record name recordDef old_ctx.ty_ctx
         { old_ctx with ty_ctx = ty_ctx ; ty_map = Map.add name (RecordType name) old_ctx.ty_map }
 
-    let check_terms_in_decls (fileContents : FSharpImplementationFileContents) =
-        let decl = fileContents.Declarations
+    let rec check_decl (ctx : ExtractionCtx)
+            (decl : FSharpImplementationFileDeclaration) : ExtractionCtx =
+        match decl with
+        | FSharpImplementationFileDeclaration.Entity(entity, decls) ->
+            let ctx =
+                if entity.IsFSharpAbbreviation then add_typedef ctx entity
+                else if entity.IsFSharpRecord then add_record ctx entity
+                else ctx
+            let ctx = List.fold check_decl ctx decls
+            ctx
+        | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(member_or_func,
+                                                                      _,
+                                                                      _) when member_or_func.IsCompilerGenerated ->
+            (* Skip all the generated declarations *)
+            ctx
+        | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(member_or_func,
+                                                                      arguments,
+                                                                      e) ->
+            let arguments =
+                List.concat arguments
+                |> List.filter (fun argument -> argument.IsValue)
+            let argument_names =
+                List.map
+                    (fun (arg : FSharpMemberOrFunctionOrValue) ->
+                    arg.FullName) arguments
+            let refined_attribute =
+                find_refined_attribute member_or_func.Attributes
+            let refined_ty = Option.map attribute_to_ty refined_attribute
 
-        let rec check_term (ctx : ExtractionCtx)
-                (decl : FSharpImplementationFileDeclaration) : ExtractionCtx =
-            match decl with
-            | FSharpImplementationFileDeclaration.Entity(entity, decls) ->
-                let ctx =
-                    if entity.IsFSharpAbbreviation then add_typedef ctx entity
-                    else if entity.IsFSharpRecord then add_record ctx entity
-                    else ctx
-                let ctx = List.fold check_term ctx decls
-                ctx
-            | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(member_or_func,
-                                                                          _,
-                                                                          _) when member_or_func.IsCompilerGenerated ->
-                (* Skip all the generated declarations *)
-                ctx
-            | FSharpImplementationFileDeclaration.MemberOrFunctionOrValue(member_or_func,
-                                                                          arguments,
-                                                                          e) ->
-                let arguments =
-                    List.concat arguments
-                    |> List.filter (fun argument -> argument.IsValue)
-                let argument_names =
-                    List.map
-                        (fun (arg : FSharpMemberOrFunctionOrValue) ->
-                        arg.FullName) arguments
-                let refined_attribute =
-                    find_refined_attribute member_or_func.Attributes
-                let refined_ty = Option.map attribute_to_ty refined_attribute
+            let ty =
+                match refined_ty with
+                | Some _ as ty -> ty
+                | None ->
+                    Option.map
+                        (fun ty -> extract_type ctx ty argument_names)
+                        member_or_func.FullTypeSafe
 
-                let ty =
-                    match refined_ty with
-                    | Some _ as ty -> ty
-                    | None ->
-                        Option.map
-                            (fun ty -> extract_type ctx ty argument_names)
-                            member_or_func.FullTypeSafe
+            let e = extract_expr ctx ty e
+            let e =
+                List.foldBack (fun arg e -> Abs(arg, e)) argument_names e
+            let ty_ctx = ctx.ty_ctx
 
-                let e = extract_expr ctx ty e
-                let e =
-                    List.foldBack (fun arg e -> Abs(arg, e)) argument_names e
-                let ty_ctx = ctx.ty_ctx
-
-                let ty_ctx =
-                    match ty with
+            let ty_ctx =
+                match ty with
+                | Some ty ->
+                    if Typing.check_type ty_ctx e ty then
+                        Typing.env_add_var member_or_func.FullName ty ty_ctx
+                    else ty_ctx
+                | None ->
+                    match Typing.infer_type ty_ctx e with
                     | Some ty ->
-                        if Typing.check_type ty_ctx e ty then
-                            Typing.env_add_var member_or_func.FullName ty ty_ctx
-                        else ty_ctx
-                    | None ->
-                        match Typing.infer_type ty_ctx e with
-                        | Some ty ->
-                            Typing.env_add_var member_or_func.FullName ty ty_ctx
-                        | None -> ty_ctx
-                { ctx with ty_ctx = ty_ctx }
-            | FSharpImplementationFileDeclaration.InitAction _ -> ctx
+                        Typing.env_add_var member_or_func.FullName ty ty_ctx
+                    | None -> ty_ctx
+            { ctx with ty_ctx = ty_ctx }
+        | FSharpImplementationFileDeclaration.InitAction _ -> ctx
 
-        let check_term' ctx decl =
+    let check_file ctx (file : FSharpImplementationFileContents) =
+        let decl = file.Declarations
+        printfn "File %s" file.FileName
+
+        let check_decl' ctx decl =
             try
-                check_term ctx decl
+                check_decl ctx decl
             with UnExtractable error -> ctx
+        List.fold check_decl' ctx decl
 
-        let _ctx = List.fold check_term' default_ctx decl
+    let check_impl_files (files: FSharpImplementationFileContents list) =
+        let ctx = default_ctx
+        let _ = List.fold check_file ctx files
         ()
