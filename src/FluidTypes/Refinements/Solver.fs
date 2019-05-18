@@ -101,6 +101,8 @@ module Solver =
         log (String.concat "\n" !outputs)
         log (String.concat "\n" !errors)
         Option.iter (fun (writer : StreamWriter) -> writer.Flush()) logger
+        let error_occured (s: string) = s <> null && s.StartsWith("(error")
+        if List.exists error_occured !outputs then failwithf "Z3 returned error"
         !outputs
 
     let is_unsat (formula : string) : bool =
