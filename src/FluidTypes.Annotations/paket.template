@@ -1,0 +1,29 @@
+type file
+id FluidTypes.Annotations
+title
+    FluidTypes.Annotations
+owners
+    Fangyi Zhou
+authors 
+    Fangyi Zhou
+projectUrl
+    https://github.com/fangyi-zhou/FluidTypes
+licenseUrl
+    https://github.com/fangyi-zhou/FluidTypes/blob/master/LICENSE
+requireLicenseAcceptance
+    false
+language
+    F#
+copyright
+    Copyright 2019
+tags
+    refinement type
+summary
+    Provide Attributes for Refinement Types
+description
+    Used for FluidTypes
+
+files
+	../../bin/FluidTypes.Annotations ==> lib
+include-referenced-projects true
+

@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net47</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Refined.fs" />
+    <None Include="paket.template" />
+  </ItemGroup>
+
+</Project>
