@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2000
@@ -54,6 +54,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".build", ".build", "{7C6D08
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FluidTypesConsole", "src\FluidTypesConsole\FluidTypesConsole.fsproj", "{B7339FEC-0891-4DF8-8BB5-0B806A64F32F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{573200D3-0915-4929-B6D8-6A3D3E84A8CB}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FluidTypes.AnnotationParsing", "src\FluidTypes.AnnotationParsing\FluidTypes.AnnotationParsing.fsproj", "{B81968DA-59E7-47E6-BFA0-DF57ACEC343A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,6 +76,10 @@ Global
 		{B7339FEC-0891-4DF8-8BB5-0B806A64F32F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7339FEC-0891-4DF8-8BB5-0B806A64F32F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7339FEC-0891-4DF8-8BB5-0B806A64F32F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B81968DA-59E7-47E6-BFA0-DF57ACEC343A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B81968DA-59E7-47E6-BFA0-DF57ACEC343A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B81968DA-59E7-47E6-BFA0-DF57ACEC343A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B81968DA-59E7-47E6-BFA0-DF57ACEC343A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -80,5 +88,6 @@ Global
 		{83F16175-43B1-4C90-A1EE-8E351C33435D} = {A6A6AF7D-D6E3-442D-9B1E-58CC91879BE1}
 		{8E6D5255-776D-4B61-85F9-73C37AA1FB9A} = {A6A6AF7D-D6E3-442D-9B1E-58CC91879BE1}
 		{D4B5B90F-F206-42E0-80D3-0A709347F7CE} = {ED8079DD-2B06-4030-9F0F-DC548F98E1C4}
+		{B81968DA-59E7-47E6-BFA0-DF57ACEC343A} = {573200D3-0915-4929-B6D8-6A3D3E84A8CB}
 	EndGlobalSection
 EndGlobal

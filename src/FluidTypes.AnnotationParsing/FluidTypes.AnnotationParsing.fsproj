@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net47</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\FluidTypes\Refinements\Definitions.fs" />
+    <Compile Include="..\FluidTypes\Refinements\Utils.fs" />
+    <Compile Include="..\FluidTypes\Refinements\FreeVar.fs" />
+    <Compile Include="..\FluidTypes\Refinements\Substitution.fs" />
+    <FsYacc Include="..\FluidTypes\Annotations\Parser.fsy">
+      <OtherFlags>--module FluidTypes.Annotations.Parser -o Parser.fs</OtherFlags>
+    </FsYacc>
+    <FsLex Include="..\FluidTypes\Annotations\Lexer.fsl">
+      <OtherFlags>--unicode -o Lexer.fs</OtherFlags>
+    </FsLex>
+    <Compile Include="Parser.fsi" />
+    <Compile Include="Parser.fs" />
+    <Compile Include="Lexer.fs" />
+    <Compile Include="..\FluidTypes\Annotations\AnnotationParser.fs" />
+    <None Include="paket.references" />
+    <None Include="paket.template" />
+  </ItemGroup>
+
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
+</Project>
