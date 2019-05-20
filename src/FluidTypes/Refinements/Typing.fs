@@ -225,7 +225,7 @@ module Typing =
             is_subtype ctx t_arg_2 t_arg_1
             && is_subtype ctx_ t_result_1 t_result_2
         | FuncType(v_1, t_arg_1, t_result_1), FuncType(v_2, t_arg_2, t_result_2) ->
-            is_subtype ctx ty_1 (Substitution.alpha_conv_ty v_2 v_1 t_result_2)
+            is_subtype ctx ty_1 (Substitution.alpha_conv_ty v_2 v_1 ty_2)
         | UnknownType ty_1, UnknownType ty_2 -> ty_1 = ty_2
         | RecordType r_1, RecordType r_2 -> r_1 = r_2
         | ProductType tys1, ProductType tys2 when (List.length tys1 = List.length tys2) ->
