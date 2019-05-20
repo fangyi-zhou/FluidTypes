@@ -65,3 +65,4 @@ ty:
 ty0:
     | LPAREN ID COLON ty0 RPAREN RIGHTARROW ty0 { FuncType ($2, $4, $7) }
     | LBRACE ID COLON ID BAR expr0 RBRACE       { BaseType (read_basetype $4, conv_this $2 $6)}
+    | ID                                        { UnknownType ($1) }

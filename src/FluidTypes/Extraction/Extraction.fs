@@ -47,9 +47,26 @@ module Extraction =
     let find_refined_attribute (attributes : FSharpAttribute seq) =
         Seq.tryHead (Seq.filter is_refined_attribute attributes)
 
-    let attribute_to_ty (attribute : FSharpAttribute) =
+    let rec find_unknowns ty : Set<string> =
+        match ty with
+        | BaseType _ -> Set.empty
+        | FuncType (_, t1, t2) -> Set.union (find_unknowns t1) (find_unknowns t2)
+        | UnknownType t -> Set.singleton t
+        | ProductType tys -> Set.unionMany (List.map find_unknowns tys)
+        | RecordType _ -> Set.empty
+
+    let resolve_ty (ctx: ExtractionCtx) (ty: Ty) : Ty =
+        let unknowns = find_unknowns ty
+        let try_resolve ty unknown =
+            match Map.tryFind unknown ctx.ty_map with
+            | Some def -> Substitution.resolve_unknown_ty_in_ty unknown def ty
+            | None -> ty
+        Set.fold try_resolve ty unknowns
+
+    let attribute_to_ty (ctx: ExtractionCtx) (attribute : FSharpAttribute) =
         let refinement = attribute.ConstructorArguments.[0] |> snd :?> string
-        parse_ty refinement
+        let ty = parse_ty refinement
+        resolve_ty ctx ty
 
     let rec extract_type (ctx : ExtractionCtx) (ty : FSharpType)
             (names : string list) : Ty =
@@ -174,7 +191,7 @@ module Extraction =
         let refined_attribute =
             find_refined_attribute entity.Attributes
         let refined_ty =
-            Option.map attribute_to_ty refined_attribute
+            Option.map (attribute_to_ty ctx) refined_attribute
         let refined_ty =
             Option.defaultValue ty_abbrev refined_ty
         let tyctx = ctx.ty_ctx
@@ -192,7 +209,7 @@ module Extraction =
     let extract_field (ctx : ExtractionCtx, def : RecordDef) (field : FSharpField) : ExtractionCtx * RecordDef =
         let name = field.Name
         let refined_attribute = find_refined_attribute field.PropertyAttributes
-        let refined_ty = Option.map attribute_to_ty refined_attribute
+        let refined_ty = Option.map (attribute_to_ty ctx) refined_attribute
         let raw_ty = extract_type ctx field.FieldType []
         let refined_ty = Option.defaultValue raw_ty refined_ty
         let tyctx = ctx.ty_ctx
@@ -245,7 +262,7 @@ module Extraction =
                     arg.FullName) arguments
             let refined_attribute =
                 find_refined_attribute member_or_func.Attributes
-            let refined_ty = Option.map attribute_to_ty refined_attribute
+            let refined_ty = Option.map (attribute_to_ty ctx) refined_attribute
 
             let ty =
                 match refined_ty with
