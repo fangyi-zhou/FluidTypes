@@ -72,7 +72,7 @@ module Substitution =
         | BaseType(basety, term) ->
             BaseType(basety, alpha_conv_term v_from v_to term)
         | FuncType(v, t_arg, t_result) when v = v_from ->
-            let sub ty = substitute_ty ty v_from (Var v_from)
+            let sub ty = substitute_ty ty v_from (Var v_to)
             FuncType(v_to, sub t_arg, sub t_result)
         | FuncType(v, t_arg, t_result) ->
             FuncType(v, conv t_arg, conv t_result)
