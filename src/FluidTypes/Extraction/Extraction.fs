@@ -280,9 +280,8 @@ module Extraction =
             let ty_ctx =
                 match ty with
                 | Some ty ->
-                    if Typing.check_type ty_ctx e ty then
-                        Typing.env_add_var member_or_func.FullName ty ty_ctx
-                    else ty_ctx
+                    let _ = Typing.check_type ty_ctx e ty
+                    Typing.env_add_var member_or_func.FullName ty ty_ctx
                 | None ->
                     match Typing.infer_type ty_ctx e with
                     | Some ty ->
