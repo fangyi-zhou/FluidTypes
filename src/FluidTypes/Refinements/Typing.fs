@@ -180,7 +180,8 @@ module Typing =
     and infer_simple_type (ctx : TyCtx) (term : Term) : Ty option =
         match term with
         | Var _
-        | Const _ -> infer_type ctx term
+        | Const _
+        | FieldGet _ -> infer_type ctx term
         | App(term_1, term_2) ->
             match infer_simple_type ctx term_1 with
             | Some(FuncType(_, t_arg, t_result)) ->
