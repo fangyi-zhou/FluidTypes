@@ -14,6 +14,7 @@ let conv_this (var: Variable) (term : Term) : Term = Substitution.alpha_conv_ter
 %token PLUS MINUS
 %token AND OR
 %token EQUAL GREATER LESS GREATEREQUAL LESSEQUAL NOTEQUAL
+%token DOLLAR
 %token NOT
 %token TRUE FALSE
 %token EOF
@@ -49,10 +50,14 @@ expr2:
     | expr3               { $1 }
 
 expr3:
-    | expr3 expr4 { App($1, $2) }
-    | expr4       { $1 }
+    | expr3 DOLLAR ID     { FieldGet($1, $3) }
+    | expr4               { $1 }
 
 expr4:
+    | expr4 expr5 { App($1, $2) }
+    | expr5       { $1 }
+
+expr5:
     | ID                  { Var $1 }
     | LPAREN expr0 RPAREN { $2 }
     | INT                 { Const (IntLiteral $1) }

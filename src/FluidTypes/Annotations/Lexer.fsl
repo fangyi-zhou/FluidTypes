@@ -37,6 +37,7 @@ rule token = parse
 | ">" { GREATER }
 | "<" { LESS }
 | "|" { BAR }
+| "$" { DOLLAR }
 | "not" { NOT }
 | "true" { TRUE }
 | "false" { FALSE }
