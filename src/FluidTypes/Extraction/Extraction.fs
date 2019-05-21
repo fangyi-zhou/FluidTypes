@@ -197,7 +197,7 @@ module Extraction =
         let tyctx = ctx.ty_ctx
         let is_valid_typedef =
             Typing.is_wf_type tyctx refined_ty
-                && Typing.is_subtype tyctx refined_ty ty_abbrev
+                && Typing.eq_simple_ty refined_ty ty_abbrev
         let ctx =
             if is_valid_typedef
             then
@@ -214,11 +214,11 @@ module Extraction =
         let refined_ty = Option.defaultValue raw_ty refined_ty
         let tyctx = ctx.ty_ctx
         if Typing.is_wf_type tyctx refined_ty then
-            if Typing.is_subtype tyctx refined_ty raw_ty then
+            if Typing.eq_simple_ty refined_ty raw_ty then
                 let tyctx = Typing.env_add_var name refined_ty tyctx
                 { ctx with ty_ctx = tyctx }, ((name, refined_ty) :: def)
             else
-                failwithf "Invalid refinement type %A for %s due to subtyping" refined_ty name (* TODO *)
+                failwithf "Invalid refinement type %A for %s due to not compatible" refined_ty name (* TODO *)
         else
             failwithf "Invalid refinement type %A for %s due to wf" refined_ty name (* TODO *)
 
