@@ -95,6 +95,7 @@ module Extraction =
             let ty_map = ctx.ty_map
             let name = Option.attempt (fun () -> ty.TypeDefinition.FullName)
             let name = Option.defaultValue (ty.TypeDefinition.DisplayName) name
+            let name = remove_namespace name
             match Map.tryFind name ty_map with
             | Some ty -> ty
             | None ->
@@ -201,7 +202,7 @@ module Extraction =
         let ctx =
             if is_valid_typedef
             then
-                let ctx = { ctx with ty_map = Map.add entity.LogicalName refined_ty ctx.ty_map }
+                let ctx = { ctx with ty_map = Map.add (remove_namespace entity.LogicalName) refined_ty ctx.ty_map }
                 resolve_unknown_ty entity.LogicalName refined_ty ctx
             else ctx
         ctx
@@ -218,6 +219,8 @@ module Extraction =
                 let tyctx = Typing.env_add_var name refined_ty tyctx
                 { ctx with ty_ctx = tyctx }, ((name, refined_ty) :: def)
             else
+                printfn "%A" raw_ty
+                printfn "%A" refined_ty
                 failwithf "Invalid refinement type %A for %s due to not compatible" refined_ty name (* TODO *)
         else
             failwithf "Invalid refinement type %A for %s due to wf" refined_ty name (* TODO *)
@@ -231,6 +234,7 @@ module Extraction =
         let ctx = { ctx with ty_ctx = { ctx.ty_ctx with varCtx = Map.empty } }
         let ctx, def = List.fold extract_field (ctx, []) fields
         let recordDef = List.rev def
+        let name = remove_namespace name
         let ty_ctx = Typing.env_add_record name recordDef old_ctx.ty_ctx
         let ctx = { old_ctx with ty_ctx = ty_ctx ; ty_map = Map.add name (RecordType name) old_ctx.ty_map }
         resolve_unknown_ty name (RecordType name) ctx

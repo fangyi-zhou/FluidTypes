@@ -60,3 +60,9 @@ module Utils =
         | "int" -> TInt
         | "bool" -> TBool
         | _ -> failwith "Unknown type"
+
+    let remove_namespace (ty_name: string) =
+        let last_dot = ty_name.LastIndexOf(".")
+        if last_dot < 0 then
+            ty_name
+        else ty_name.Substring(last_dot + 1)
