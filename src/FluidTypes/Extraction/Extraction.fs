@@ -1,13 +1,9 @@
 namespace FluidTypes.Extraction
 
 module Extraction =
-    open FSharp.Compiler.AbstractIL.Internal.Library
     open FSharp.Compiler.SourceCodeServices
     open FluidTypes.Refinements
     open FluidTypes.Annotations.AnnotationParser
-    open FluidTypes.Errors
-
-    exception UnExtractable of Error
 
     type TyMap = Map<string, Ty>
 
@@ -94,7 +90,7 @@ module Extraction =
             ProductType(List.map (fun ty -> extract_type ctx ty []) args)
         | _ when ty.HasTypeDefinition ->
             let ty_map = ctx.ty_map
-            let name = Option.attempt (fun () -> ty.TypeDefinition.FullName)
+            let name = try Some (ty.TypeDefinition.FullName) with _ -> None
             let name = Option.defaultValue (ty.TypeDefinition.DisplayName) name
             let name = remove_namespace name
             match Map.tryFind name ty_map with
@@ -344,12 +340,7 @@ module Extraction =
     let check_file ctx (file : FSharpImplementationFileContents) =
         let decl = file.Declarations
         printfn "File %s" file.FileName
-
-        let check_decl' ctx decl =
-            try
-                check_decl ctx decl
-            with UnExtractable error -> ctx
-        List.fold check_decl' ctx decl
+        List.fold check_decl ctx decl
 
     let check_impl_files (files: FSharpImplementationFileContents list) =
         let ctx = default_ctx
