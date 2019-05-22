@@ -48,6 +48,7 @@ module Substitution =
             else FuncType(v, sub t_arg, sub t_result)
         | UnknownType _ -> ty
         | RecordType _ -> ty
+        | UnionType _ -> ty
         | ProductType tys -> ProductType(List.map sub tys)
 
     and alpha_conv_term (v_from : Variable) (v_to : Variable) (term : Term) : Term =
@@ -87,6 +88,7 @@ module Substitution =
             FuncType(v, conv t_arg, conv t_result)
         | UnknownType _ -> ty
         | RecordType _ -> ty
+        | UnionType _ -> ty
         | ProductType tys -> ProductType(List.map conv tys)
 
     and resolve_unknown_ty_in_ty (name : string) (typedef : Ty) (ty_to_resolve : Ty) : Ty =
@@ -99,6 +101,7 @@ module Substitution =
         | UnknownType name_ when name = name_ -> typedef
         | UnknownType name_ -> UnknownType name_
         | RecordType r -> RecordType r
+        | UnionType u -> UnionType u
         | ProductType tys -> ProductType (List.map resolve tys)
 
     and resolve_unknown_ty_in_term (name : string) (typedef : Ty) (term_to_resolve : Term) : Term =

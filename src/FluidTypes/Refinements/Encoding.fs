@@ -31,6 +31,7 @@ module Encoding =
             { env with consts = Map.add x b env.consts }
         | FuncType _ -> env
         | UnknownType _ -> env
+        | UnionType _ -> env
         | RecordType r ->
             match Map.tryFind r ctx.recordDef with
             | Some defs ->

@@ -28,4 +28,5 @@ module FreeVar =
             Set.union (free_var_ty t_arg) (Set.remove v (free_var_ty t_result))
         | UnknownType _ -> Set.empty
         | RecordType _ -> Set.empty
+        | UnionType _ -> Set.empty
         | ProductType tys -> Set.unionMany (List.map free_var_ty tys)

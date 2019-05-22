@@ -24,6 +24,7 @@ module Definitions =
         (* of result *)
         | UnknownType of string
         | RecordType of string
+        | UnionType of string
         | ProductType of Ty list
 
     and BaseTy =
@@ -55,13 +56,16 @@ module Definitions =
         | Negate
 
     type RecordDef = (string * Ty) list
+    type UnionDef = (string * Ty) list
 
     type RecordDefMap = Map<string, RecordDef>
+    type UnionDefMap = Map<string, UnionDef>
 
     type TyCtx =
         { varCtx : Map<Variable, Ty>
           predicateCtx : List<Term>
-          recordDef : RecordDefMap }
+          recordDef : RecordDefMap
+          unionDef: UnionDefMap }
 
     let special_this : Variable = "$this"
 

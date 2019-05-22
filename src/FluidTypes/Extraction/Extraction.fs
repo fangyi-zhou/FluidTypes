@@ -54,6 +54,7 @@ module Extraction =
         | UnknownType t -> Set.singleton t
         | ProductType tys -> Set.unionMany (List.map find_unknowns tys)
         | RecordType _ -> Set.empty
+        | UnionType _ -> Set.empty
 
     let resolve_ty (ctx: ExtractionCtx) (ty: Ty) : Ty =
         let unknowns = find_unknowns ty
@@ -249,6 +250,41 @@ module Extraction =
         let ctx = { old_ctx with ty_ctx = ty_ctx ; ty_map = Map.add name (RecordType name) old_ctx.ty_map }
         resolve_unknown_ty name (RecordType name) ctx
 
+    let extract_union_case (ctx : ExtractionCtx) (def : UnionDef) (unionCase : FSharpUnionCase) : UnionDef =
+        (* FIXME: Refactor duplicated code c.f. records *)
+        let name = unionCase.Name
+        let raw_ty = List.ofSeq (Seq.map (fun (f: FSharpField) -> f.FieldType) unionCase.UnionCaseFields)
+        let raw_ty =
+            match raw_ty with
+            | [ty] -> extract_type ctx ty []
+            | _ -> ProductType (List.map (fun ty -> extract_type ctx ty []) raw_ty)
+        let refined_attribute = find_refined_attribute unionCase.Attributes
+        let refined_ty = Option.map (attribute_to_ty ctx) refined_attribute
+        let refined_ty = Option.defaultValue raw_ty refined_ty
+        let tyctx = ctx.ty_ctx
+        if Typing.is_wf_type tyctx refined_ty then
+            if Typing.eq_simple_ty refined_ty raw_ty then
+                (name, refined_ty) :: def
+            else
+                printfn "%A" raw_ty
+                printfn "%A" refined_ty
+                failwithf "Invalid refinement type %A for %s due to not compatible" refined_ty name (* TODO *)
+        else
+            failwithf "Invalid refinement type %A for %s due to wf" refined_ty name (* TODO *)
+
+    let add_union (ctx: ExtractionCtx) (entity: FSharpEntity) =
+        let name = entity.FullName
+        let union_cases = List.ofSeq entity.UnionCases
+        let old_ctx = ctx
+        (* Clear var ctx *)
+        let ctx = { ctx with ty_ctx = { ctx.ty_ctx with varCtx = Map.empty } }
+        let defs = List.fold (extract_union_case ctx) [] union_cases
+        let unionDef = List.rev defs
+        let name = remove_namespace name
+        let ty_ctx = Typing.env_add_union name unionDef old_ctx.ty_ctx
+        let ctx = { old_ctx with ty_ctx = ty_ctx ; ty_map = Map.add name (UnionType name) old_ctx.ty_map }
+        resolve_unknown_ty name (UnionType name) ctx
+
     let rec check_decl (ctx : ExtractionCtx)
             (decl : FSharpImplementationFileDeclaration) : ExtractionCtx =
         match decl with
@@ -256,6 +292,7 @@ module Extraction =
             let ctx =
                 if entity.IsFSharpAbbreviation then add_typedef ctx entity
                 else if entity.IsFSharpRecord then add_record ctx entity
+                else if entity.IsFSharpUnion then add_union ctx entity
                 else ctx
             let ctx = List.fold check_decl ctx decls
             ctx

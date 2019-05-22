@@ -6,7 +6,8 @@ module Typing =
     let empty_ctx : TyCtx =
         { varCtx = Map.empty
           predicateCtx = []
-          recordDef = Map.empty }
+          recordDef = Map.empty
+          unionDef = Map.empty }
 
     let env_add_var (v : Variable) (ty : Ty) (ty_ctx : TyCtx) : TyCtx =
         { (* TODO: Renaming *)
@@ -15,12 +16,15 @@ module Typing =
         { ty_ctx with predicateCtx = predicate :: ty_ctx.predicateCtx }
     let env_add_record (name : Variable) (def : RecordDef) (ty_ctx : TyCtx) : TyCtx =
         { ty_ctx with recordDef = Map.add name def ty_ctx.recordDef }
+    let env_add_union (name : Variable) (def : UnionDef) (ty_ctx : TyCtx) : TyCtx =
+        { ty_ctx with unionDef = Map.add name def ty_ctx.unionDef }
     let env_lookup_record (name : Variable) (ty_ctx : TyCtx) : RecordDef option =
         Map.tryFind name ty_ctx.recordDef
     let env_resolve_unknown_ty (name : string) (typedef : Ty) (ty_ctx : TyCtx) : TyCtx =
         { varCtx = Map.map (fun _ -> Substitution.resolve_unknown_ty_in_ty name typedef) ty_ctx.varCtx
           predicateCtx = List.map (Substitution.resolve_unknown_ty_in_term name typedef) ty_ctx.predicateCtx
           recordDef = Map.map (fun _ -> List.map (fun (f, ty) -> f, Substitution.resolve_unknown_ty_in_ty name typedef ty)) ty_ctx.recordDef
+          unionDef = Map.map (fun _ -> List.map (fun (f, ty) -> f, Substitution.resolve_unknown_ty_in_ty name typedef ty)) ty_ctx.unionDef
         }
 
     let type_const (c : Constant) : Ty =
@@ -167,6 +171,7 @@ module Typing =
                  else false
              | UnknownType _ -> true
              | RecordType _ -> true
+             | UnionType _ -> true
              | ProductType tys -> List.forall (is_wf_type ctx) tys)
         else
             (let undef_vars = Set.toList undef_vars
@@ -181,6 +186,7 @@ module Typing =
         | UnknownType t1, UnknownType t2 ->
             remove_namespace t1 = remove_namespace t2 (* FIXME: Handle Namespace correctly *)
         | RecordType r_1, RecordType r_2 -> r_1 = r_2
+        | UnionType u_1, UnionType u_2 -> u_1 = u_2
         | ProductType tys1, ProductType tys2 when (List.length tys1 = List.length tys2) ->
             List.forall2 eq_simple_ty tys1 tys2
         | _, _ -> false
@@ -243,6 +249,7 @@ module Typing =
         | UnknownType ty_1, UnknownType ty_2 ->
             remove_namespace ty_1 = remove_namespace ty_2 (* FIXME: Handle Namespace correctly *)
         | RecordType r_1, RecordType r_2 -> r_1 = r_2
+        | UnionType u_1, UnionType u_2 -> u_1 = u_2
         | ProductType tys1, ProductType tys2 when (List.length tys1 = List.length tys2) ->
             List.forall2 (is_subtype ctx) tys1 tys2
         | _ -> false

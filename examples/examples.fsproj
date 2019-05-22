@@ -13,6 +13,7 @@
     <Compile Include="Records.fs" />
     <Compile Include="Tuple.fs" />
     <Compile Include="Unit.fs" />
+    <Compile Include="Union.fs" />
   </ItemGroup>
 
   <ItemGroup>
