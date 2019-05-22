@@ -108,13 +108,13 @@ module Extraction =
             printfn "Unknown Type %s without definition " typeName
             UnknownType(typeName + fresh_name())
 
-    let extract_ty_from_def (member_or_func: FSharpMemberOrFunctionOrValue) (argument_names: string list) =
+    let extract_ty_from_def (ctx : ExtractionCtx) (member_or_func: FSharpMemberOrFunctionOrValue) (argument_names: string list) =
         let refined_ty = find_refined_attribute member_or_func.Attributes in
-        let refined_ty = Option.map attribute_to_ty refined_ty in
+        let refined_ty = Option.map (attribute_to_ty ctx) refined_ty in
         let ty =
             match refined_ty with
             | Some _ as ty -> ty
-            | None -> Option.map (fun ty -> extract_type ty argument_names) member_or_func.FullTypeSafe
+            | None -> Option.map (fun ty -> extract_type ctx ty argument_names) member_or_func.FullTypeSafe
         in
         ty
 
@@ -191,9 +191,6 @@ module Extraction =
         | BasicPatterns.NewTuple(ty_, terms) ->
             let terms = List.map (extract_expr ctx None) terms
             Tuple(terms)
-                let const_value = const_value_obj.ToString() in
-                printfn "Unknown const %s" const_value;
-                UnknownTerm (const_value, extract_type const_type [])
         | BasicPatterns.Value (value_to_get) ->
             Var value_to_get.FullName
         | BasicPatterns.Let ((binding_var, binding_expr), body_expr) ->
@@ -203,9 +200,9 @@ module Extraction =
                       but that is not the most precise type and consequent subtyping may fail.
                       To get this done properly, we can use annotated lambdas *)
             let binding_expr = extract_expr ctx None binding_expr in
-            let ty_binding_opt = extract_ty_from_def binding_var [] in
+            let ty_binding_opt = extract_ty_from_def ctx binding_var [] in
             let ty_binding = Option.get ty_binding_opt in (* FIXME *)
-            let ty_body = extract_type body_expr.Type [] in
+            let ty_body = extract_type ctx body_expr.Type [] in
             let body_expr = extract_expr ctx None body_expr in
             let lambda = Abs (binding_var.FullName, body_expr) in
             let lambda = Anno (lambda, FuncType (fresh_name (), ty_binding, ty_body)) in
