@@ -89,9 +89,11 @@ module Typing =
                 None
         | Let(var, t1, t2) ->
             match infer_type ctx t1 with
-            | Some ty ->
-                let ctx = env_add_var var ty ctx
-                infer_type ctx t2
+            | Some ty_1 ->
+                let ctx = env_add_var var ty_1 ctx
+                match infer_type ctx t2 with
+                | Some ty_2 -> Some (Substitution.substitute_ty ty_2 var t1)
+                | None -> None
             | None -> None
         | _ ->
             err_not_inferrable (term.ToString())
