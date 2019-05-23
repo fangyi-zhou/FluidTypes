@@ -181,6 +181,16 @@ module Extraction =
         | BasicPatterns.NewTuple(ty_, terms) ->
             let terms = List.map (extract_expr ctx None) terms
             Tuple(terms)
+        | BasicPatterns.Let((var, binding_expr), body_expr) ->
+            let binding_expr = extract_expr ctx None binding_expr
+            let varName = var.FullName
+            let ty_binding = Option.map (fun ty -> extract_type ctx ty []) var.FullTypeSafe
+            let binding_expr =
+                match ty_binding with
+                | Some ty_binding -> Anno (binding_expr, ty_binding)
+                | None -> binding_expr
+            let body_expr = extract_expr ctx None body_expr
+            Let(varName, binding_expr, body_expr)
         | otherwise ->
             let e = e.ToString()
             printfn "Unknown expression %s" e
