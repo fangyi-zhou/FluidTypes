@@ -66,3 +66,19 @@ module Utils =
         if last_dot < 0 then
             ty_name
         else ty_name.Substring(last_dot + 1)
+
+    let rec is_inferrable (term: Term) : bool =
+        match term with
+        | Var _
+        | Const _
+        | Anno _
+        | Coerce _
+        | UnknownTerm _ ->
+            true
+        | App (t, _)
+        | FieldGet (t, _) ->
+            is_inferrable t
+        | Let(_, t1, t2) ->
+            is_inferrable t1 && is_inferrable t2
+        | _ ->
+            false

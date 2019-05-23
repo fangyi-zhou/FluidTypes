@@ -187,8 +187,8 @@ module Extraction =
             let ty_binding = Option.map (fun ty -> extract_type ctx ty []) var.FullTypeSafe
             let binding_expr =
                 match ty_binding with
-                | Some ty_binding -> Anno (binding_expr, ty_binding)
-                | None -> binding_expr
+                | Some ty_binding when not (is_inferrable binding_expr) -> Anno (binding_expr, ty_binding)
+                | _ -> binding_expr
             let body_expr = extract_expr ctx None body_expr
             Let(varName, binding_expr, body_expr)
         | otherwise ->
