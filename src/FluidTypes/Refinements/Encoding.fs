@@ -27,7 +27,7 @@ module Encoding =
         | BaseType(b, term) ->
             let env =
                 encode_term env ctx
-                    (Substitution.substitute_term term x (Var special_this))
+                    (Substitution.substitute_term term special_this (Var x))
             { env with consts = Map.add x b env.consts }
         | FuncType _ -> env
         | UnknownType _ -> env
