@@ -103,14 +103,6 @@ module Typing =
                 Some (RecordType record)
             else
                 None
-        | Let(var, t1, t2) ->
-            match infer_type ctx t1 with
-            | Some ty_1 ->
-                let ctx = env_add_var var ty_1 ctx
-                match infer_type ctx t2 with
-                | Some ty_2 -> Some (Substitution.substitute_ty ty_2 var t1)
-                | None -> None
-            | None -> None
         | _ ->
             err_not_inferrable (term.ToString())
             None
@@ -152,6 +144,12 @@ module Typing =
                  | ProductType tys when (List.length terms = List.length tys) ->
                     List.forall2 (check_type ctx) terms tys
                  | _ -> false
+             | Let(var, t1, t2) ->
+                 match infer_type ctx t1 with
+                 | Some ty_1 ->
+                     let ctx = env_add_var var ty_1 ctx
+                     check_type ctx t2 ty
+                 | None -> false
              | t ->
                  (* Subtyping *)
                  match infer_type ctx t with

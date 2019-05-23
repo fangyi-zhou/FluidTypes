@@ -78,8 +78,6 @@ module Utils =
         | App (t, _)
         | FieldGet (t, _) ->
             is_inferrable t
-        | Let(_, t1, t2) ->
-            is_inferrable t1 && is_inferrable t2
         | _ ->
             false
 
