@@ -2,7 +2,8 @@
 // FAKE build script
 // --------------------------------------------------------------------------------------
 
-#r "paket: groupref FakeBuild //"
+#r "paket: groupref FakeBuild //
+nuget Fake.Core.Process //"
 
 #load "./.fake/build.fsx/intellisense.fsx"
 
@@ -160,6 +161,20 @@ Target.create "Build" (fun _ ->
                 ]
          }
     MSBuild.build setParams solutionFile
+)
+
+Target.create "FixFsLexYacc" (fun _ ->
+    if Environment.isLinux
+    then
+        let scriptName = "scripts" </> "fix-fslexyacc.sh"
+        let updateProcInfo p =
+            { p with
+                FileName = "bash"
+                Arguments = scriptName
+            }
+        let retCode = Process.execSimple updateProcInfo System.TimeSpan.MaxValue
+        if retCode <> 0 then failwithf "FixFsLexYacc failed with exit code %d" retCode
+    else ()
 )
 
 // --------------------------------------------------------------------------------------
@@ -382,6 +397,7 @@ Target.create "All" ignore
 "Clean"
   ==> "AssemblyInfo"
   ==> "Restore"
+  ==> "FixFsLexYacc"
   ==> "Build"
   ==> "CopyBinaries"
   ==> "RunTests"
