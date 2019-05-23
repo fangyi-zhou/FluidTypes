@@ -12,6 +12,7 @@ module Definitions =
         | IfThenElse of Term * Term * Term
         | Anno of Term * Ty
         | Coerce of Term * Ty
+        | Let of Variable * Term * Term
         | UnknownTerm of string * Ty
         | NewRecord of Term list * string
         | FieldGet of Term * string

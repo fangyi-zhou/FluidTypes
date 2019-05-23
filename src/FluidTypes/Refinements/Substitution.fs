@@ -25,6 +25,11 @@ module Substitution =
             IfThenElse(sub term_cond, sub term_then, sub term_else)
         | Anno(term_, ty) -> Anno(sub term_, substitute_ty ty x replace)
         | Coerce(term_, ty) -> Coerce(sub term_, substitute_ty ty x replace)
+        | Let(v, t1, t2) ->
+            let free_vars = FreeVar.free_var_term replace
+            if Set.contains v free_vars then
+                sub (alpha_conv_term v (find_replacement_var v free_vars) term)
+            else Let(v, sub t1, sub t2)
         | UnknownTerm _ -> term
         | FieldGet(term, field) -> FieldGet(sub term, field)
         | NewRecord(terms, record) -> NewRecord(List.map sub terms, record)
@@ -60,6 +65,10 @@ module Substitution =
             IfThenElse(conv term_cond, conv term_then, conv term_else)
         | Anno(term_, ty) -> Anno(conv term_, alpha_conv_ty v_from v_to ty)
         | Coerce(term_, ty) -> Coerce(conv term_, alpha_conv_ty v_from v_to ty)
+        | Let(v, t1, t2) when v = v_from ->
+            Let(v_to, conv t1, substitute_term t2 v (Var v_to))
+        | Let(v, t1, t2) ->
+            Let(v, conv t1, conv t2)
         | FieldGet(term, field) -> FieldGet(conv term, field)
         | NewRecord(terms, record) -> NewRecord(List.map conv terms, record)
         | Tuple(terms) -> Tuple(List.map conv terms)
@@ -102,6 +111,7 @@ module Substitution =
         | IfThenElse (t1, t2, t3) -> IfThenElse (resolve t1, resolve t2, resolve t3)
         | Anno (t, ty) -> Anno (resolve t, resolve_unknown_ty_in_ty name typedef ty)
         | Coerce (t, ty) -> Coerce (resolve t, resolve_unknown_ty_in_ty name typedef ty)
+        | Let(v, t1, t2) -> Let (v, resolve t1, resolve t2)
         | UnknownTerm (s, ty) -> UnknownTerm (s, resolve_unknown_ty_in_ty name typedef ty)
         | NewRecord (terms, s) -> NewRecord (List.map resolve terms, s)
         | FieldGet (term, f) -> FieldGet (resolve term, f)

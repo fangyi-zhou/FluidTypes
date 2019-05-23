@@ -14,6 +14,7 @@ module FreeVar =
                             free_var_term term_else ]
         | Anno(term_, ty)
         | Coerce(term_, ty) -> Set.union (free_var_term term_) (free_var_ty ty)
+        | Let(var, t1, t2) -> Set.union (free_var_term t1) (Set.remove var (free_var_term t2))
         | FieldGet(term_, _) -> free_var_term term_
         | NewRecord(terms, _) ->
             List.map free_var_term terms |> Set.unionMany

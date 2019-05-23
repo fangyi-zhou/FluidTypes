@@ -87,6 +87,12 @@ module Typing =
                 Some (RecordType record)
             else
                 None
+        | Let(var, t1, t2) ->
+            match infer_type ctx t1 with
+            | Some ty ->
+                let ctx = env_add_var var ty ctx
+                infer_type ctx t2
+            | None -> None
         | _ ->
             err_not_inferrable (term.ToString())
             None
