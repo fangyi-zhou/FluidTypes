@@ -82,3 +82,12 @@ module Utils =
             is_inferrable t1 && is_inferrable t2
         | _ ->
             false
+
+    let get_union_test_name union_name case_name =
+        sprintf "$%s_is%s" union_name case_name
+
+    let get_union_getter_name union_name case_name =
+        sprintf "$%s_get%s" union_name case_name
+
+    let get_union_constructor_name union_name case_name =
+        sprintf "$%s_ctor%s" union_name case_name

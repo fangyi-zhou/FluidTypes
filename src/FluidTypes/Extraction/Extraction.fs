@@ -52,6 +52,11 @@ module Extraction =
         | RecordType _ -> Set.empty
         | UnionType _ -> Set.empty
 
+    let ensure_union ty =
+        match ty with
+        | UnionType u -> u
+        | _ -> failwithf "Internal Error: %A is not a union type" ty
+
     let resolve_ty (ctx: ExtractionCtx) (ty: Ty) : Ty =
         let unknowns = find_unknowns ty
         let try_resolve ty unknown =
@@ -104,6 +109,8 @@ module Extraction =
             let typeName = ty.ToString()
             printfn "Unknown Type %s without definition " typeName
             UnknownType(typeName + fresh_name())
+
+    let branches_stack = ref []
 
     let rec extract_expr (ctx : ExtractionCtx) (e : FSharpExpr) : Term =
         let ty = extract_type ctx e.Type []
@@ -185,6 +192,37 @@ module Extraction =
                 | _ -> binding_expr
             let body_expr = extract_expr ctx body_expr
             Let(varName, binding_expr, body_expr)
+        | BasicPatterns.DecisionTree(e, branches) ->
+            let branches = List.map (snd >> extract_expr ctx) branches
+            branches_stack := branches :: !branches_stack
+            let e = extract_expr ctx e
+            branches_stack := List.tail (!branches_stack)
+            e
+        | BasicPatterns.DecisionTreeSuccess(idx, _) ->
+            let branches = List.head (!branches_stack)
+            List.item idx branches
+        | BasicPatterns.UnionCaseTest(e, ty_, union_case) ->
+            let e = extract_expr ctx e
+            let ty_ = extract_type ctx ty_ []
+            let union_name = ensure_union ty_
+            let case_name = union_case.Name
+            App (Var (get_union_test_name union_name case_name), e)
+        | BasicPatterns.UnionCaseGet(e, ty_, union_case, _) ->
+            let e = extract_expr ctx e
+            let ty_ = extract_type ctx ty_ []
+            let union_name = ensure_union ty_
+            let case_name = union_case.Name
+            App (Var (get_union_getter_name union_name case_name), e)
+        | BasicPatterns.NewUnionCase(ty_, union_case, es) ->
+            let es = List.map (extract_expr ctx) es
+            let e =
+                match es with
+                | [e] -> e
+                | es -> Tuple es
+            let ty_ = extract_type ctx ty_ []
+            let union_name = ensure_union ty_
+            let case_name = union_case.Name
+            App (Var (get_union_constructor_name union_name case_name), e)
         | otherwise ->
             let e = e.ToString()
             printfn "Unknown expression %s" e

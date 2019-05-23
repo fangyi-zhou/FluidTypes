@@ -17,6 +17,18 @@ module Typing =
     let env_add_record (name : Variable) (def : RecordDef) (ty_ctx : TyCtx) : TyCtx =
         { ty_ctx with recordDef = Map.add name def ty_ctx.recordDef }
     let env_add_union (name : Variable) (def : UnionDef) (ty_ctx : TyCtx) : TyCtx =
+        let union_cases = List.map fst def
+        let make_union_case_test case_name =
+            get_union_test_name name case_name, FuncType ("_", UnionType name, mk_basetype TBool)
+        let make_union_case_getter (case_name, ty) =
+            get_union_getter_name name case_name, FuncType ("_", UnionType name, ty)
+        let make_union_case_ctor (case_name, ty) =
+            get_union_constructor_name name case_name, FuncType ("_", ty, UnionType name)
+        let union_case_tests = List.map make_union_case_test union_cases
+        let union_case_getters = List.map make_union_case_getter def
+        let union_case_ctors = List.map make_union_case_ctor def
+        let generatedDefs = union_case_tests @ union_case_getters @ union_case_ctors
+        let ty_ctx = List.fold (fun ty_ctx (var, ty) -> env_add_var var ty ty_ctx) ty_ctx generatedDefs
         { ty_ctx with unionDef = Map.add name def ty_ctx.unionDef }
     let env_lookup_record (name : Variable) (ty_ctx : TyCtx) : RecordDef option =
         Map.tryFind name ty_ctx.recordDef
