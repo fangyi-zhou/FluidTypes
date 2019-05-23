@@ -105,14 +105,12 @@ module Extraction =
             printfn "Unknown Type %s without definition " typeName
             UnknownType(typeName + fresh_name())
 
-    let rec extract_expr (ctx : ExtractionCtx) (ty : Ty option) (e : FSharpExpr) : Term =
+    let rec extract_expr (ctx : ExtractionCtx) (e : FSharpExpr) : Term =
         let ty = extract_type ctx e.Type []
         match e with
         | BasicPatterns.Application(func_expr, type_args, arg_exprs) ->
-            (* FIXME: None in ty *)
-            let func = extract_expr ctx None func_expr
-            (* FIXME: None in ty *)
-            let args = List.map (extract_expr ctx None) arg_exprs
+            let func = extract_expr ctx func_expr
+            let args = List.map (extract_expr ctx) arg_exprs
             List.fold (fun f a -> App(f, a)) func args
         | BasicPatterns.Call(obj_expr_opt, member_or_func, type_args1,
                              type_args2, arg_exprs) ->
@@ -137,9 +135,8 @@ module Extraction =
                 | "Microsoft.FSharp.Core.Operators.not" -> Const(Unop Not)
                 | name -> Var name
 
-            (* FIXME: None in ty *)
-            let obj_opt = Option.map (extract_expr ctx None) obj_expr_opt
-            let args = List.map (extract_expr ctx None) arg_exprs
+            let obj_opt = Option.map (extract_expr ctx) obj_expr_opt
+            let args = List.map (extract_expr ctx) arg_exprs
 
             let func =
                 match obj_opt with
@@ -147,12 +144,12 @@ module Extraction =
                 | None -> func
             List.fold (fun f a -> App(f, a)) func args
         | BasicPatterns.IfThenElse(guard_expr, then_expr, else_expr) ->
-            let cond = extract_expr ctx None guard_expr
-            let then_ = extract_expr ctx None then_expr
-            let else_ = extract_expr ctx None else_expr
+            let cond = extract_expr ctx guard_expr
+            let then_ = extract_expr ctx then_expr
+            let else_ = extract_expr ctx else_expr
             IfThenElse(cond, then_, else_)
         | BasicPatterns.Lambda(lambda_var, body_expr) ->
-            let body = extract_expr ctx None body_expr
+            let body = extract_expr ctx body_expr
             Abs(lambda_var.FullName, body)
         | BasicPatterns.Const(const_value_obj, const_type) ->
             match const_value_obj with
@@ -165,7 +162,7 @@ module Extraction =
                 UnknownTerm(const_value, extract_type ctx const_type [])
         | BasicPatterns.Value(value_to_get) -> Var value_to_get.FullName
         | BasicPatterns.FSharpFieldGet(Some(expr), _ty, field) ->
-            let expr = extract_expr ctx None expr
+            let expr = extract_expr ctx expr
             FieldGet(expr, field.Name)
         | BasicPatterns.NewRecord(ty_, fields) ->
             let ty_ = extract_type ctx ty_ []
@@ -173,20 +170,20 @@ module Extraction =
                 match ty_ with
                 | RecordType r -> r
                 | _ -> failwithf "Internal Error: %A is not a record type" ty_
-            let exprs = List.map (extract_expr ctx None) fields
+            let exprs = List.map (extract_expr ctx) fields
             NewRecord(exprs, record_name)
         | BasicPatterns.NewTuple(ty_, terms) ->
-            let terms = List.map (extract_expr ctx None) terms
+            let terms = List.map (extract_expr ctx) terms
             Tuple(terms)
         | BasicPatterns.Let((var, binding_expr), body_expr) ->
-            let binding_expr = extract_expr ctx None binding_expr
+            let binding_expr = extract_expr ctx binding_expr
             let varName = var.FullName
             let ty_binding = Option.map (fun ty -> extract_type ctx ty []) var.FullTypeSafe
             let binding_expr =
                 match ty_binding with
                 | Some ty_binding when not (is_inferrable binding_expr) -> Anno (binding_expr, ty_binding)
                 | _ -> binding_expr
-            let body_expr = extract_expr ctx None body_expr
+            let body_expr = extract_expr ctx body_expr
             Let(varName, binding_expr, body_expr)
         | otherwise ->
             let e = e.ToString()
@@ -319,7 +316,7 @@ module Extraction =
                         (fun ty -> extract_type ctx ty argument_names)
                         member_or_func.FullTypeSafe
 
-            let e = extract_expr ctx ty e
+            let e = extract_expr ctx e
             let e =
                 List.foldBack (fun arg e -> Abs(arg, e)) argument_names e
             let ty_ctx = ctx.ty_ctx
