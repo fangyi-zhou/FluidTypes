@@ -47,7 +47,7 @@ module Solver =
     let set_log_queries log_queries =
         opt := { !opt with log_queries = log_queries }
 
-    exception UnEncodable
+    exception UnEncodable of Term
 
     let run_solver (formula : string) : string list =
         if (!opt).path.IsNone then set_z3_path (find_z3())
@@ -130,9 +130,9 @@ module Solver =
             | And -> "and"
             | Or -> "or"
             | EqualInt -> "="
-            | NotEqualInt -> raise UnEncodable
+            | NotEqualInt -> failwith "NotEqualInt is not supported"
             | EqualBool -> "="
-            | NotEqualBool -> raise UnEncodable
+            | NotEqualBool -> failwith "NotEqualBool is not supported"
             | Greater -> ">"
             | GreaterEqual -> ">="
             | Less -> "<"
@@ -164,17 +164,28 @@ module Solver =
                 sprintf "(ite %s %s %s)" sexp_cond sexp_then sexp_else
             | FieldGet(Var v, field) ->
                 sprintf "%s$%s" v field
-            | _ -> raise UnEncodable
+            | _ -> raise (UnEncodable term)
 
         let encode_term term =
+            prepend smt_script (sprintf "(assert %s)" (term_to_sexp term))
+
+        let try_encode_term term =
             try
                 prepend smt_script (sprintf "(assert %s)" (term_to_sexp term))
-            with UnEncodable ->
-                printfn "Unencodable %A" term
-                ()
+            with
+                | UnEncodable _ ->
+                    ()
 
-        Set.iter encode_term env.clauses
+        Set.iter try_encode_term env.clauses
+        let contains_unencodable =
+            try
+                Set.iter encode_term env.ensure_encoded_clauses
+                false
+            with
+                | UnEncodable e ->
+                    printfn "Cannot encode %A" e
+                    true
         prepend smt_script "(check-sat)"
         let script =
             String.concat "\n" (List.rev !smt_script)
-        is_unsat script
+        not (contains_unencodable) && is_unsat script

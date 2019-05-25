@@ -10,10 +10,14 @@ module Encoding =
     let empty_env : EncodingEnv =
         { consts = Map.empty
           functions = Map.empty
-          clauses = Set.empty }
+          clauses = Set.empty
+          ensure_encoded_clauses = Set.empty }
 
     let encode_term (env : EncodingEnv) (ctx : TyCtx) (term : Term) : EncodingEnv =
         { env with clauses = Set.add term env.clauses }
+
+    let encode_term_ensure_encoded (env : EncodingEnv) (ctx : TyCtx) (term : Term) : EncodingEnv =
+        { env with ensure_encoded_clauses = Set.add term env.ensure_encoded_clauses }
 
     let bind_record_ty (r : RecordDef) (x : Variable) (ty : Ty) : Ty =
         let fields_to_bind = List.map fst r
@@ -58,5 +62,5 @@ module Encoding =
             { env with consts = Map.add special_this base_type env.consts }
         let env = encode_ctx env ctx
         let env = encode_term env ctx term_1
-        let env = encode_term env ctx (mk_not term_2)
+        let env = encode_term_ensure_encoded env ctx (mk_not term_2)
         Solver.solve_encoding env

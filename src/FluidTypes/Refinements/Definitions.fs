@@ -72,4 +72,5 @@ module Definitions =
     type EncodingEnv =
         { consts : Map<Variable, BaseTy>
           functions : Map<Variable, Variable * Term>
-          clauses : Set<Term> }
+          clauses : Set<Term>
+          ensure_encoded_clauses : Set<Term> }
