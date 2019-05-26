@@ -16,3 +16,14 @@ let ex1 : IntTuple = {
 let x = ex1.x
 [<Refined("{v:int|v>=0}")>]
 let y = ex1.y
+
+type Even = {
+  half : int;
+  [<Refined("{v:int|v=half+half}")>] num: int;
+}
+
+let evenPlus x y =
+  {
+    half = x.half + y.half
+    num = x.num + y.num
+  }
