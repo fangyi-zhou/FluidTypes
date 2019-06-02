@@ -9,7 +9,8 @@ module Extraction =
 
     type ExtractionCtx =
         { ty_ctx : TyCtx
-          ty_map : TyMap }
+          ty_map : TyMap
+          enum_values : Map<string, Map<string, int>> }
 
     let unresolved_tys : Set<string> ref = ref Set.empty
 
@@ -20,7 +21,8 @@ module Extraction =
 
     let default_ctx : ExtractionCtx =
         { ty_ctx = Typing.empty_ctx
-          ty_map = default_ty_map }
+          ty_map = default_ty_map
+          enum_values = Map.empty }
 
     let counter = ref 0
 
@@ -34,6 +36,7 @@ module Extraction =
         then printfn "Resolved Type: %s" name
         { ty_ctx = Typing.env_resolve_unknown_ty name typedef ctx.ty_ctx
           ty_map = Map.map (fun _ -> Substitution.resolve_unknown_ty_in_ty name typedef) ctx.ty_map
+          enum_values = ctx.enum_values
         }
 
     let is_refined_attribute (attribute : FSharpAttribute) =
@@ -316,6 +319,22 @@ module Extraction =
         let ctx = { old_ctx with ty_ctx = ty_ctx ; ty_map = Map.add name (UnionType name) old_ctx.ty_map }
         resolve_unknown_ty name (UnionType name) ctx
 
+    let add_enum (ctx: ExtractionCtx) (entity: FSharpEntity) =
+        let name = remove_namespace entity.FullName
+        let extract_value values (field : FSharpField) =
+            if field.Name = "value__"
+            then values (* Ignore Compiler Generated Field *)
+            else
+                let value = (Option.get field.LiteralValue) :?> int
+                Map.add field.Name value values
+        let values = Seq.fold extract_value Map.empty entity.FSharpFields
+        { ctx
+            with
+                enum_values = Map.add name values ctx.enum_values
+                (* Enums are integers *)
+                ty_map = Map.add name (mk_basetype TInt) ctx.ty_map
+        }
+
     let rec check_decl (ctx : ExtractionCtx)
             (decl : FSharpImplementationFileDeclaration) : ExtractionCtx =
         match decl with
@@ -324,6 +343,7 @@ module Extraction =
                 if entity.IsFSharpAbbreviation then add_typedef ctx entity
                 else if entity.IsFSharpRecord then add_record ctx entity
                 else if entity.IsFSharpUnion then add_union ctx entity
+                else if entity.IsEnum then add_enum ctx entity
                 else ctx
             let ctx = List.fold check_decl ctx decls
             ctx

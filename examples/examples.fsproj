@@ -14,6 +14,7 @@
     <Compile Include="Tuple.fs" />
     <Compile Include="Unit.fs" />
     <Compile Include="Union.fs" />
+    <Compile Include="Enum.fs" />
   </ItemGroup>
 
   <ItemGroup>
