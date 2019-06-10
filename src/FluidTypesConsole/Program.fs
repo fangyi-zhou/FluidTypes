@@ -55,9 +55,13 @@ let process_input (filename : string) =
 
     let results =
         checker.ParseAndCheckProject(projectOptions) |> Async.RunSynchronously
-    if Array.isEmpty results.Errors then
-        (Extraction.check_impl_files results.AssemblyContents.ImplementationFiles
-         report_errors())
+    if Array.isEmpty results.Errors then begin
+        Extraction.check_impl_files results.AssemblyContents.ImplementationFiles
+        let ret = report_errors()
+        if ret = 0 then
+            printfn "All check passed!"
+        ret
+    end
     else
         printfn "Input contains compilation errors:"
         Seq.iter (printfn "%A") results.Errors
