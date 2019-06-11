@@ -126,39 +126,33 @@ module Extraction =
                              type_args2, arg_exprs) ->
             let func =
                 match member_or_func.FullName with
-                | "Microsoft.FSharp.Core.Operators.( + )" -> Some (Const(Binop Plus))
-                | "Microsoft.FSharp.Core.Operators.( - )" -> Some (Const(Binop Minus))
-                | "Microsoft.FSharp.Core.Operators.( < )" -> Some (Const(Binop Less))
+                | "Microsoft.FSharp.Core.Operators.( + )" -> Const(Binop Plus)
+                | "Microsoft.FSharp.Core.Operators.( - )" -> Const(Binop Minus)
+                | "Microsoft.FSharp.Core.Operators.( < )" -> Const(Binop Less)
                 | "Microsoft.FSharp.Core.Operators.( > )" ->
-                    Some (Const(Binop Greater))
+                    Const(Binop Greater)
                 | "Microsoft.FSharp.Core.Operators.( = )" ->
-                    Some (Const(Binop EqualInt))
+                    Const(Binop EqualInt)
                 (* FIXME *)
                 | "Microsoft.FSharp.Core.Operators.( <> )" ->
-                    Some (Const(Binop NotEqualInt))
+                    Const(Binop NotEqualInt)
                 (* FIXME *)
                 | "Microsoft.FSharp.Core.Operators.( <= )" ->
-                    Some (Const(Binop LessEqual))
+                    Const(Binop LessEqual)
                 | "Microsoft.FSharp.Core.Operators.( >= )" ->
-                    Some (Const(Binop GreaterEqual))
-                | "Microsoft.FSharp.Core.Operators.( ~- )" -> Some (Const(Unop Negate))
-                | "Microsoft.FSharp.Core.Operators.not" -> Some (Const(Unop Not))
-                | _ -> None
+                    Const(Binop GreaterEqual)
+                | "Microsoft.FSharp.Core.Operators.( ~- )" -> Const(Unop Negate)
+                | "Microsoft.FSharp.Core.Operators.not" -> Const(Unop Not)
+                | name -> Var name
 
-            match func with
-            | Some func ->
-                let obj_opt = Option.map (extract_expr ctx) obj_expr_opt
-                let args = List.map (extract_expr ctx) arg_exprs
+            let obj_opt = Option.map (extract_expr ctx) obj_expr_opt
+            let args = List.map (extract_expr ctx) arg_exprs
 
-                let func =
-                    match obj_opt with
-                    | Some o -> App(func, o)
-                    | None -> func
-                List.fold (fun f a -> App(f, a)) func args
-            | None ->
-                let e = e.ToString()
-                printfn "Unknown expression %s" e
-                UnknownTerm(e, ty)
+            let func =
+                match obj_opt with
+                | Some o -> App(func, o)
+                | None -> func
+            List.fold (fun f a -> App(f, a)) func args
         | BasicPatterns.IfThenElse(guard_expr, then_expr, else_expr) ->
             let cond = extract_expr ctx guard_expr
             let then_ = extract_expr ctx then_expr
