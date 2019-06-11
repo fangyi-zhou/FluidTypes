@@ -132,13 +132,14 @@ module Typing =
                      check_type ctx term (Substitution.alpha_conv_ty v' v ty)
                  | _ -> false
              | IfThenElse(term_cond, term_then, term_else) ->
-                 match infer_type ctx term_cond with
-                 | Some(BaseType(TBool, _)) ->
+                 if check_type ctx term_cond (mk_basetype TBool)
+                 then
                      let ctx_1 = env_add_predicate term_cond ctx
                      let ctx_2 = env_add_predicate (mk_not term_cond) ctx
-                     check_type ctx_1 term_then ty
-                     && check_type ctx_2 term_else ty
-                 | _ -> false
+                     let check_1 = check_type ctx_1 term_then ty
+                     let check_2 = check_type ctx_2 term_else ty
+                     check_1 && check_2
+                 else false
              | Tuple(terms) ->
                  match ty with
                  | ProductType tys when (List.length terms = List.length tys) ->
