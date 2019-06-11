@@ -152,7 +152,12 @@ module Extraction =
                 match obj_opt with
                 | Some o -> App(func, o)
                 | None -> func
-            List.fold (fun f a -> App(f, a)) func args
+            match obj_opt with
+            | Some _ ->
+                let e = e.ToString()
+                printfn "Unknown expression %s" e
+                UnknownTerm(e, ty)
+            | None -> List.fold (fun f a -> App(f, a)) func args
         | BasicPatterns.IfThenElse(guard_expr, then_expr, else_expr) ->
             let cond = extract_expr ctx guard_expr
             let then_ = extract_expr ctx then_expr
