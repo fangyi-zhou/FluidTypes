@@ -17,6 +17,7 @@ module Definitions =
         | NewRecord of Term list * string
         | FieldGet of Term * string
         | Tuple of Term list
+        | Diverge
 
     and Ty =
         | BaseType of BaseTy * Term

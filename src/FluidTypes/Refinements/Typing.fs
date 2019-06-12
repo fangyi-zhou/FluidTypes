@@ -123,6 +123,7 @@ module Typing =
     and check_type (ctx : TyCtx) (term : Term) (ty : Ty) : bool =
         if is_wf_type ctx ty then
             (match term with
+             | Diverge -> true
              | Abs(v, term_) ->
                  match ty with
                  | FuncType(v', t_arg, t_result) when v = v' ->

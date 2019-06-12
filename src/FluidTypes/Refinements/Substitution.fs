@@ -34,6 +34,7 @@ module Substitution =
         | FieldGet(term, field) -> FieldGet(sub term, field)
         | NewRecord(terms, record) -> NewRecord(List.map sub terms, record)
         | Tuple(terms) -> Tuple(List.map sub terms)
+        | Diverge -> Diverge
 
     and substitute_ty (ty : Ty) (x : Variable) (replace : Term) : Ty =
         let sub ty = substitute_ty ty x replace
@@ -74,6 +75,7 @@ module Substitution =
         | NewRecord(terms, record) -> NewRecord(List.map conv terms, record)
         | Tuple(terms) -> Tuple(List.map conv terms)
         | UnknownTerm(u, ty) -> UnknownTerm(u, ty)
+        | Diverge -> Diverge
 
     and alpha_conv_ty (v_from : Variable) (v_to : Variable) (ty : Ty) : Ty =
         (* Replace all bound `v_from` to `v_to` *)
@@ -119,3 +121,4 @@ module Substitution =
         | NewRecord (terms, s) -> NewRecord (List.map resolve terms, s)
         | FieldGet (term, f) -> FieldGet (resolve term, f)
         | Tuple terms -> Tuple(List.map resolve terms)
+        | Diverge -> Diverge

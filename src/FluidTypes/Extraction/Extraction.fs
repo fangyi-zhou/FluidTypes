@@ -143,21 +143,21 @@ module Extraction =
                     Const(Binop GreaterEqual)
                 | "Microsoft.FSharp.Core.Operators.( ~- )" -> Const(Unop Negate)
                 | "Microsoft.FSharp.Core.Operators.not" -> Const(Unop Not)
+                | "Microsoft.FSharp.Core.Operators.failwith" -> Diverge
                 | name -> Var name
 
             let obj_opt = Option.map (extract_expr ctx) obj_expr_opt
             let args = List.map (extract_expr ctx) arg_exprs
 
-            let func =
-                match obj_opt with
-                | Some o -> App(func, o)
-                | None -> func
             match obj_opt with
             | Some _ ->
                 let e = e.ToString()
                 printfn "Unknown expression %s" e
                 UnknownTerm(e, ty)
-            | None -> List.fold (fun f a -> App(f, a)) func args
+            | None ->
+                match func with
+                | Diverge -> Diverge
+                | _ -> List.fold (fun f a -> App(f, a)) func args
         | BasicPatterns.IfThenElse(guard_expr, then_expr, else_expr) ->
             let cond = extract_expr ctx guard_expr
             let then_ = extract_expr ctx then_expr

@@ -20,6 +20,7 @@ module FreeVar =
             List.map free_var_term terms |> Set.unionMany
         | UnknownTerm _ -> Set.empty
         | Tuple(terms) -> Set.unionMany (List.map free_var_term terms)
+        | Diverge -> Set.empty
 
     and free_var_ty (ty : Ty) : Set<Variable> =
         match ty with
