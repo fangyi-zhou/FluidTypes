@@ -45,10 +45,14 @@ module Errors =
     let has_errors () = not (List.isEmpty !all_errors)
 
     let report_errors() : int =
-        if not (has_errors ()) then 0
+        if not (has_errors ()) then
+            printfn "No errors! All checks passed"
+            0
         else
             (let errors = List.map show_error !all_errors
              List.iter (printfn "%s") errors
+             let err_count = List.length errors
+             printfn "Found %d error%s" (err_count) (if err_count > 1 then "s" else "")
              1)
 
     let add_error e = all_errors := e :: !all_errors
